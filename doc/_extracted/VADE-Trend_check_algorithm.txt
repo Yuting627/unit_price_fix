@@ -1,0 +1,77 @@
+\n===== SLIDE 1 =====\nTrend check in VADE\nAlgorithm\nMarius Zabulionis,
+Connect Data Science Product, Automation team
+2019.04\n\n===== SLIDE 2 =====\nWhat is a trend check\nBefore delivering new period RMS data to clients it should be validated
+At individual market level
+At individual product level
+For specific facts
+
+
+“Trend check” is a new period validation algorithm which is assessing if this data is in line with back period data
+Consistent in terms of level
+Reflect seasonal behavior
+Reflect effect of irregular events 
+
+
+Markets*Items*Facts*Periods with data not consistent with back periods  are flagged as exceptions\n\n===== SLIDE 3 =====\nTrend check approach\nBuild time series model by Market*Product*Fact.\n
+Predict new period data and establish Lower and Upper bounds of tolerance.
+\nValidate actual new period  data against tolerance bounds.
+\n\n===== SLIDE 4 =====\nTime series model\n\n===== SLIDE 5 =====\nData/Inputs\nIrregular event calendar
+It covers:
+Events/holidays that are present every year but at different time (e.g. Easter, Ramadan, etc.)
+Big events that are happening once (e.g. Olympic games, Football world cup, etc.)
+Event calendar is transformed into dichotomous indicator variables (one variable per event), showing if given event is present in specific period (1) or not (0) 
+
+
+Data of given fact for specific product in specific market in historical periods
+Data of non-additive facts or additive facts for Total country and Total category is used as is
+Data of additive facts for more granular MBDs or products is first transformed into relative form by dividing it by Total country*Total category value in a given period (i.e. calculating contribution or share). This is used to perform validation\n\n===== SLIDE 6 =====\nconcept\nExponential smoothing (Holt Winters)\nRegression method\nModel combines 2 techniques\n\n===== SLIDE 7 =====\nConcept\nAdditive combination of both methods\nNote: if historical periods contain less than 2 years of data regression part and seasonal components are not used - set to 0\n\n===== SLIDE 8 =====\nModeling Process\n\n===== SLIDE 9 =====\nRegression part\nRegression model is constructed separately from Exponential smoothing
+
+It use entire history of original data and indicator-transformed calendar.  
+
+Regression coefficients by event estimated using ordinary least square method in the following way
+
+
+
+
+
+
+
+Note: if historical periods contain less than 2 years of data regression part is not used – regression coefficients set to 0\n\n===== SLIDE 10 =====\nexcluding regression effect \nIn order to remove effect of irregular events from original series, results of regression model are subtracted tom original series. 
+\n\n===== SLIDE 11 =====\nExponential smoothing\n\n===== SLIDE 12 =====\nExponential smoothing\n\n===== SLIDE 13 =====\nExponential smoothing - initialization\nInitial trend
+
+By default initial trend calculation is using first 2 years of data
+
+
+
+
+
+
+
+If 2 years are not available initial trend calculation is simplified to:  
+
+\n\n===== SLIDE 14 =====\nExponential smoothing - initialization\n\n===== SLIDE 15 =====\nExponential smoothing - initialization\n\n===== SLIDE 16 =====\nExponential smoothing - initialization\n\n===== SLIDE 17 =====\nExponential smoothing - recalculation\n\n===== SLIDE 18 =====\nBack period prediction\n\n===== SLIDE 19 =====\nModel precision assessment\n\n===== SLIDE 20 =====\nTolerance bound construction and new data validation\n\n===== SLIDE 21 =====\nData validation Process\n\n===== SLIDE 22 =====\nNew period prediction\n\n===== SLIDE 23 =====\nTolerance boundary set-up\n\n===== SLIDE 24 =====\nTolerance boundary set-up\n\n===== SLIDE 25 =====\n
+Real observed data in new periods compared  to established upper and lower tolerance boundaries
+Observed values outside boundaries are considered as exceptions
+
+
+
+
+\nNew period data validation\nException\n\n===== SLIDE 26 =====\nNew period data validation\n\n===== SLIDE 27 =====\nExcel - Example\nAlgorithm replicated in Excel
+
+
+\n\n===== SLIDE 28 =====\nTesting results\nModel accuracy based on data of 13 categories:
+
+Details:				      	     					Summary:
+
+
+
+
+
+
+
+
+
+
+Products with Numeric distribution above 10% have much better accuracy than small ones \n--- TABLE ---\n | sMAPE* |  | \nProduct level | ND > 10% | ND < 10% | All\nCategory | 6% |  | 6%\nManufacturer | 11% | 18% | 15%\nBrand | 12% | 33% | 20%\nSub-Brand | 13% | 38% | 24%\nItem | 17% | 42% | 32%\nAll | 14% | 37% | 26%\n* Median of symmetric MAPE for products
+grouped by Product hierarchy
+grouped by Numeric distribution level

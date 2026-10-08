@@ -10,12 +10,12 @@ CODE_DIR = ROOT / "code"
 if str(CODE_DIR) not in sys.path:
     sys.path.insert(0, str(CODE_DIR))
 
-from funcs.store_mp import (
+from core.data_prep.data_prep import (
     agg_province_shoptype,
-    merge_before_mp_target,
+    merge_by_period,
     read_before_mp,
     read_store_target,
-    write_province_shoptype,
+    write_excel,
 )
 
 DEFAULT_BEFORE_MP = ROOT / "data" / "before_mp" / "O2O_itemcoding_output_20261408_newline_fixed.csv.gz"
@@ -30,12 +30,12 @@ def run(
     output_path=DEFAULT_OUTPUT,
     period_id: int = DEFAULT_PERIOD,
 ) -> Path:
-    before_mp = read_before_mp(before_mp_path)
+    before_mp = read_before_mp(before_mp_path, keep_desc=False)
     before_mp = before_mp[before_mp["period_id"] == period_id]
     store_target = read_store_target(target_path)
-    merged = merge_before_mp_target(before_mp, store_target)
+    merged, _ = merge_by_period(before_mp, store_target)
     summary = agg_province_shoptype(merged)
-    return write_province_shoptype(summary, output_path)
+    return write_excel({"Sheet1": summary}, output_path)
 
 
 if __name__ == "__main__":

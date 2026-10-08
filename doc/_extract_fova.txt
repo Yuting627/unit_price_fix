@@ -1,0 +1,1458 @@
+
+
+Specifications for the FoVa parameters dynamic definition  
+
+(DRAFT DOCUMENT – WORK IN PROGRESS)
+
+Prepared by: Pambos Charalambous
+July 2016
+V7_final
+
+Table of Contents
+ TOC \o "1-3" \h \z \u I.Purpose of this document/ problem statement: PAGEREF _Toc455046491 \h 3
+A.Process definition: PAGEREF _Toc455046492 \h 3
+1.Structural indicators (Brackets of bar codes/ brackets of units sold / Price brackets ) PAGEREF _Toc455046493 \h 4
+2.Match indicators (common; total; new; cancelled items) PAGEREF _Toc455046494 \h 4
+3.Trended tests for comparison with the trend of specific bucket defined at a channel level PAGEREF _Toc455046495 \h 4
+B.Description / definition of the parameters used PAGEREF _Toc455046496 \h 5
+II.DYNAMIC CALCULATION OF FoVa test PARAMETERS PAGEREF _Toc455046497 \h 9
+A.Algorithm  description: PAGEREF _Toc455046498 \h 9
+B.LONGITUTE TEST SPECIFICATIONS PAGEREF _Toc455046499 \h 10
+1.Process description PAGEREF _Toc455046500 \h 10
+2.PROCESS STEPS PAGEREF _Toc455046501 \h 10
+3.Detail analysis of the process PAGEREF _Toc455046502 \h 11
+C.DEFINITION OF PARAMETERS BASED ON STORE/ TREND BEHAVIOUR (diff between cons. Periods) PAGEREF _Toc455046503 \h 15
+1.TREND TEST for recognising trend variation over periods PAGEREF _Toc455046504 \h 15
+2.Confidence Limits calculation (based on IQR) (spreadsheet “Set Limits”) based on 13 last weeks’ calculated statistics PAGEREF _Toc455046505 \h 16
+3.FINAL LIMITS CALCULATION for the TREND test: PAGEREF _Toc455046506 \h 16
+4.Combining LONGITUTE and TREND test results together PAGEREF _Toc455046507 \h 19
+D.TREND TEST_317 – modified algorithm PAGEREF _Toc455046508 \h 20
+1.METHODOLOGY for TREND_317 limits calculation PAGEREF _Toc455046509 \h 22
+2.Process description: PAGEREF _Toc455046510 \h 23
+3.FINAL DECISION ON ‘NON IDENTIFIED’ OUTLIERS PAGEREF _Toc455046511 \h 24
+E.Specifications for the KS FoVa α parameter (dynamic definition) PAGEREF _Toc455046512 \h 26
+1.Structure indicators - KS parameters PAGEREF _Toc455046513 \h 26
+2.Determination of critical values for the KS-test: PAGEREF _Toc455046514 \h 27
+3.AUTOMATION PROCESS FOR THE CALCUALTION OF α PARAMETER PAGEREF _Toc455046515 \h 29
+4.Determination of the a parameter - For each IBD, starting from median of MED(NREC): PAGEREF _Toc455046516 \h 31
+F.DEFINITION OF KPI’s PAGEREF _Toc455046517 \h 36
+
+Specifications for the FoVa parameters dynamic definition  
+ (DRAFT DOCUMENT – WORK IN PROGRESS)
+Purpose of this document/ problem statement:
+Purpose of the different tests included in the FoVa process is to assess at loading time the quality of incoming stores in regards to their structure and trend and provide early feedback on the quality of stores loaded to enable contacting the retailer in case received data suffers from issues like “identical data with previous week was sent”, “truncation”, “identical prices with previous week” and other well know reasons which can occur due to mismanagement of raw data from retailers side or for early identification of trend patterns which needs further explanations by the Retailer,
+To derive to the above decision logic a set of statistical tests are run on loading time and when combined together they provide the data quality status of the store “ok” or “questionable” with the relevant reasoning and recommendations on actions.
+The status of the store/week/ FoVa for each individual test (“questionable” or “ok”)  is govern by a set of parameters (upper and lower bound) which currently are static and are instructed/ update by the user in a specific FoVa table.
+From the current experience it has been identified that the way we manage and update FoVa test parameters is creating inconsistencies on the final Store/FoVa status which in return generated a substantial number of “false questionable” stores which have to be manually inspected by the user and in return the final FoVa store status can be updated to reflect the result of this investigations.
+In an effort to eliminate the number of “false questionable” stores and within the scope of the ZTV process we have analyzed and evaluate the current status and as a result a new approach for the definition of the FoVa test parameters has been defined.
+
+Purpose of this document is to provide the specifications for the dynamic calculation and update of the parameters used in each FoVa test.
+
+Process definition:
+The objective of the Scan*Edit FOVA-function is to detect stores where the weekly scanning data file have some structural deficiency or structural changes. 
+The detection of questionable data is based on a comparison of the current week data file with the one from the last good week. 
+The objective is to make a statement about the general usability of the data (for a shop-period) and in particular to detect stores with structural deficiencies from one week to the other in terms of (we do not care about limited numbers of items with problematic data).
+The structural deficiencies investigated through FOVA are the ones usually occurred:
+Truncated file (in terms of completeness of the list of barcodes or number of days)
+Identical file
+Trend problems
+Price problems
+Other non-identified issues
+FoVa works on the basis 3 types of indicators:
+Structural indicators (Brackets of bar codes/ brackets of units sold / Price brackets ) 
+Apart from some more diagnostic information the decision making whether a store is considered to have questionable data is taken based on comparisons of the frequency distributions of items according to:
+Number of units sold
+Structure of the item code
+Price
+The comparisons are done by means of a Kolmogorov-Smirnov test.
+
+Match indicators (common; total; new; cancelled items) 
+
+Trended tests for comparison with the trend of specific bucket defined at a channel level
+
+INDICATORS ON TREND
+Total Shop / Week
+number of records
+number of units
+turnover
+EAN’s
+LAC’s
+Var Weight
+number of records
+number of units
+turnover
+number of records
+number of units
+turnover
+number of records
+number of units
+turnover
+
+Description / definition of the parameters used
+The “Match” and “trend” indicators used for the FoVa decision process are described in the below table. A number of other indicators are derived based on the calculations described (see for instance the “price synch indicator” Statistics). Based on these statistics and together with the structure indicators a decision logic is built to define a store as “FoVa-ok” or “FoVa-questionable”.
+
+The decision process used for the determination of the structural deficiencies as described above are following the logic in the below table.Based on the qualifications of the statistics described above, judgements are made based on some RULES described in the table below which are passed into the summary table below
+
+Overlap between tests (modifications applied):
+The test sequence is as above (from 1 to 13) and it has been identified that some of the tests are overlapped (mainly test 309 and 310). For this reason there is a modification of the initial decision logic as specified with dark orange in the above table.
+Aditionally with this set of specifications we are eliminating decision logic 13 (monitor status=13) and we replace it with the reasoning specified in section D.3 of this document i.e.
+If decision results = “310” then move to the decision logic specified in section D.3
+
+Other modifications in decision logic:
+v_nc_trndfct_norm=1 used in decision 6 &amp; 7 are also based on static parameters
+The calculation done for v_nc_trndfct_norm is a check of the same value used in the trend common  check against two new limits in the Parameters:
+334_FACTOR_LB and 334_FACTOR_UB
+If value (the same used for the 334 TREND COMMON case) is within bounds the value of v_nc_trndfct is set to 1.
+Default values for the parameters are :
+FOVA    334_FACTOR_LB              TREND_FACTOR Lowerbound                    0.9
+FOVA    334_FACTOR_UB             TREND_FACTOR Upperbound                    1.1
+FOVA    334_LB                               TRENDCOMMON Lowerbound                  0.9
+FOVA    334_UB                              TRENDCOMMON Upperbound                  1.1
+Country Italy uses :
+FOVA    334_LB                                               0.85
+FOVA    334_UB                                             1.25
+FOVA    334_FACTOR_LB                              0.75
+FOVA    334_FACTOR_UB                             1.4
+As we have better manage trend tests in the approach take we are eliminating the need for the trndfct_norm test used in decision logic 304 / 305 – 311/312
+Elimination of the 305 &amp; 312 decision logic of the condition invoking trndfct_norm factor
+Elimination of decision logic 304 &amp;311
+
+ACTIONS FOR 306/ 307/ 308:
+If pequl price=1 then estimate the store
+If not then report these cases in KPI’s for further investigations with the chain 
+
+Remaining open items:
+P_inline test produces issues:
+Evaluating correctness of the calculations currently (review code)
+
+*The names of the tag description is indicated in the table below
+
+TAGS &amp; description of the  FoVa test 
+AC_STATTAG
+AC_STATTAGDESCRIPTION
+(as you can find in FOVA reports)
+
+309
+NB_STAT
+v_nc_nbstat
+317
+N_KS_CREF
+v_nc_kscref
+318
+N_KS_PRICE
+v_nc_ksprice
+319
+N_KS_SGROUP
+v_nc_kssgroup
+320
+N_KS_UNIT
+v_nc_ksunit
+322
+PRICESYNC
+v_nc_psync
+323
+P_INLINE
+v_nc_pinline
+324
+P_ITEM_CAN
+v_nc_ican
+325
+P_ITEM_COMMON
+v_nc_icommon
+326
+P_ITEM_NEW
+v_nc_inew
+327
+P_PRICE_EQUAL
+v_nc_pequal
+330
+P_UNITS_EQUAL
+v_nc_uequal
+333
+TREND_ALL
+v_nc_tall
+334
+TREND_COMMON
+v_nc_tcommon
+v_nc_trndfct
+340
+P_UNITS_LESS
+v_nc_uless
+341
+P_UNITS_MORE
+v_nc_umore
+
+ACTIONS TAKEN BASED ON THE ABOVE DECISION LOGIC
+The below are the actions proposed by the system for each one of the decision items 
+(for items 6-9 – we do not take action this week but we reflect the issues identified in the reporting system / depending on the number of exceptions by chain then the administrator can stop the process and go back to the chain to clarify the problem / same applies for no reset / identical volumetrics.) 
+
+Nr
+Rule
+DECISIONS
+1
+DATA_GOOD
+Data OK
+2
+TRUNC
+Trunc_problem
+Correct_by_estimation
+3
+ID_MOV
+Identical volumetrics
+Correct by estimation
+4
+NO_RESET
+Cumulative volumetrics (no reset)
+Correct by estimation (subtraction) 
+
+5-6
+TREND_UP
+Upward trend
+Correct by estimation
+7-8
+TREND_DOWN
+Downward trend
+Correct by estimation
+9
+ID_PRICE
+Identical price problem
+
+No correction required ; message datamanager
+10
+CH_PRICE
+Identical price problem
+
+No correction required ; message datamanage
+11
+PRICE_SYNC
+Price_syncing problem
+
+No correction required ; message datamanager
+12
+HIGH_DEVIANCE
+Price_syncing problem
+No correction required ; message datamanager
+13
+
+Unidentified problem
+
+DYNAMIC CALCULATION OF FoVa test PARAMETERS 
+Algorithm  description:
+The analysis of the empirical data for each FoVa test results has indicated that the presence of strong seasonality from one week to the other requires a dynamic process for the evaluation of the FoVa test parameters (upper &amp; lower bounds) to recognise long tern variation (present in a number of weeks) but also in the short term (from one week to the other).
+To recognise true outliers we are introducing a dynamic process where based on historical data:
+
+We analyse for each FoVa test long term variation and define FoVa test parameters based on historical data of the past 13 weeks (longitude test)
+We analyse for each FoVa test short term variation (difference of FoVa test results between 2 consecutive weeks and define FoVa test parameters based on this new variable (TREND TEST). 
+As we cannot define parameters for the TREND TEST based on the current periods which would have been the identical process we perform this based on historical data of 13 weeks and as soon as an adequate number of stores are loaded in the current period we introduce a weighting process to combine knowledge from previous 13 and current week for the definition of the TREND TEST FoVa parameters.
+For the final definition of FoVa Test parameters (upper and lower bound) the LONGITUTE and TREND test results are combined together to enable identification of the true questionable store
+The FoVa  parameters defined through the  longitude test identify stores which are questionable because their overall FoVa test empirical values are above the upper and lower bound
+The FoVa  parameters defined through the  TREND test identify stores which are questionable because of their change on the FoVa test empirical values between consecutive periods  are above the upper and lower bound defined based on historical data of period 13 weeks and the current week
+A store/Week/Fova test takes a FINAL “questionable” status  if both test (longitude and TREND) are positive
+Example 1
+
+NC_PERIODID
+AC_NSHOPID
+TAG_333
+longitude outlier
+TREND
+TREND_outlier
+final_outlier
+human_decision
+1875
+1300570302
+0,93
+0
+-0,01
+0
+0
+3,00
+1876
+1300570302
+1,27
+1
+0,34
+0
+0
+3,00
+Example 2
+
+NC_PERIODID
+AC_NSHOPID
+TAG_333
+longitude outlier
+TREND
+TREND_outlier
+final_outlier
+human_decision
+1844
+1300051242
+1,00
+0
+-0,05
+0
+0,00
+3,00
+1845
+1300051242
+1,57
+1
+0,57
+1
+1,00
+11,00
+
+LONGITUTE TEST SPECIFICATIONS
+Process description
+Dynamic definition of FoVa parameters based on historical empirical data of FoVa test results
+Use last 13 weeks of data for each FoVa test results
+Elimination of trend (de-trending of time series in order to produce more stable FoVa test parameters
+Update this every period based on the last 13 weeks
+De-trend current period FoVa test results
+Compare against parameters and define exceptional cases by FoVa test / inspection market
+Every week FoVa test parameters are recalculated based on the previous 13 weeks data
+
+Introduce a trend test where you define outliers based on the Difference of FoVa test results between periods
+We will rely mostly on a Xsectional analysis for each period (compare the trend of each store / Fova test result against similar stores (same IBD),
+As for the first stores coming in we do not have enough sample to proceed with the Xsectional analysis we will initiate the trend validation based on the critical limits defined based on historical data and quickly converge towards current period’s parameters by using a ‘sample size related weighting process’
+
+PROCESS STEPS
+This process comprises of the following steps
+Selection of t-1, to t-13 previous weeks
+Data preparation for the FoVa tests’ parameters estimation
+Seasonality check/ Definition of seasonal factors
+De-trend of FoVa test results by week
+Statistics calculation and definition of critical limits (FoVa test parameters)
+
+Detail analysis of the process
+Selection of weeks for the parameters definition:
+We perform the below process for each FoVa test at IBD level
+Parameters are defined at IBD /  FoVa test level
+Parameters for each FoVa test  are defined at IBD level
+One store can belong to only 1 IBD (distinct)
+IBD is taken from the last week parameters are defined and is valid for all previous 13 weeks
+IBD definition apply for ALL FoVa tests (all stores should belong to an IBD to be validated through FoVa)
+We will work with 13 prior weeks from the current (current being the new period for which FoVa runs for first time)
+The recommended number is 3 months data (13 weeks). When less number of periods’ data are used, the variation of limits from week to week is quite high (refer to 1st attachment below), and more number of outliers are identified
+We exclude from the analysis store/weeks for which:
+ the status of the store is questionable
+FoVa test values=0
+For each week/ FoVa test the empirical values are trimmed to eliminate extreme cases
+Sort the store/week / FoVa test empirical values descending and exclude from both sides of the list 1% of the observations
+
+Data preparation for the FoVa tests’ parameters estimation
+
+Seasonality check/ Definition of seasonal factors
+Purpose of this step:
+to check for seasonality in each periods FoVa test results
+estimate seasonal factor T which will be applied in the FoVa test results
+For the limits definition
+For ‘de-seasonalising’ current period’s individual stores’ FoVa test results to enable better outliers identification (not affected by the trend variation observed)
+ft = FoVa test result current period 
+ft= average FoVa test results for the period/ IBD
+ft:1-13= Average of the t1 - t13  periods’ average FoVa result (by IBD)
+t= current period
+Tt.ibd= trend factor estimated in the below trend check process (period/ FoVa test / IBD)
+
+Trend factor by period/ FoVa test:
+
+Tt.ibd= ftft:1-13
+
+Trend check
+Based on seasonal IBD’s (part of the other workstream):
+For active common stores in current and previous period proceed as follows:
+Define seasonal IBDs 
+For each seasonal IBD the trend factor T will be calculated (as described above) and each store belonging in the specific seasonal IBD will take the respective trend factor.
+
+   Compute “number of stores” variables for the item:
+   n+ = Number of cases where “FoVa test empirical value current week / FoVa test empirical value previous week” &gt; 1
+,  (where cases = number of stores)
+   n- = Number of cases where “FoVa test empirical value current week / FoVa test empirical value previous week” &lt; 1  
+ n = n+ + n-
+
+Construct the ‘SIGN TEST file’ (based on the ‘MBD_CAT_file_(t)’ file ) :
+Sign Test statistics calculation – The calculation is done by FoVa test / seasonal IBD’s
+Calculate 
+
+Significant is if T &gt; 1.281552 (alpha=0.10, one side test), thus existence of trend. 
+
+IF trend=.Yes. AND 
+ IF max (n+, n-) = n+ THEN positive trend ELSE negative trend 
+
+Adjusted store/week/ FoVa test empirical values  :
+
+Set Tt.ibd =1.0 if sign test fails 
+IF positive trend AND ft &lt;1, THEN Tt.ibd=1.
+IF negative trend AND ft &gt;1, THEN Tt.ibd=1.
+
+else
+
+fadj.i.t= fova test resultTt.ibd
+
+EXAMPLE of the result of the DE-TRENDING process
+
+An example of the process of de-trending FoVa parameter and limits calculation using South Africa data is shown in the Excel file attached below:
+
+Statistics calculation and definition of critical limits (FoVa test parameters)
+For the evaluation and set up of the parameters’ default values it is suggested using the empirical distribution of the scores stored in the SirVal FoVa log files.
+
+Evaluation of the empirical distributions: The evaluation of the empirical distributions of different parameters for different weeks, indicates different distribution shapes. 
+The distributions of the parameter values appear as quite well behaved, but are somewhat more peaked and heavy-tailed then a  normal distribution.  A strong indication of skewness appears in most of the cases and this is different for the different statistics and is also different by week. Depending on the indicator the skewness could be positive or negative. 
+
+Methodology description:
+We will work with the empirical values of the different parameters for which the results are stored on a store/ weekly basis in SirVal.
+WE USE THE DE-TRENDED EMPIRICAL VALUES AS DEFINED IN THE PREVIOUS STAGE
+We will approach the evaluation of the parameters through the classical Tukey rule 
+The process accounts also for the skewness observed in the distribution of the empirical parameter.
+We take in consideration the period-to-period trend and store-level variation
+Determine median IQR for centered deviance and setup a  0.7% symmetric boundary (0.7% corresponds with the 1.5*IQR which is typically used for outlier detection)
+Add back in the max(abs(median)) on either side
+
+The parameters definition is be based on prior 13 weeks 
+Based on de-trended data as define in the previous step above
+In the attached XL a demonstration of the method is described following the below steps:
+Calculate by week Q1, median, Q3 and quartile skewness as (Q3-2*median+Q1)/(Q3-Q1)
+Calculate by week IQR=Q3-Q1
+Adjust by week Q1 and Q3 as:
+If skewness &gt; 0 then adj Q1=Q1 and adj Q3=Q3*Q3/median
+If skewness &lt; 0 then adj Q1=Q1*Q1/median and Q3=Q3
+If skewness=0 then adj Q1=Q1 and adj Q3=Q3
+Calculate by week adjusted IQR=adj Q3 – adj Q1
+Calculate across all weeks Median(median), Max(IQR), Max(adj IQR) and MEDIAN(skewness)
+Calculate ini LL and ini UL as LL=Median(median)-1.9992*Max(IQR) and UL=Median(median)+1.9992*Max(IQR)
+Calculate final LL and final UL as:
+If MEDIAN(skewness)&gt;0 then final LL=ini LL and final UL=Median(median)+1.9992*Max(adj IQR)
+If MEDIAN(skewness)&lt;0 then final LL=Median(median)-1.9992*Max(adj IQR) and final UL=ini UL
+If MEDIAN(skewness)=0 then final LL=ini LL and final UL=ini UL
+
+DEFINITION OF PARAMETERS BASED ON STORE/ TREND BEHAVIOUR (diff between cons. Periods)
+
+TREND TEST for recognising trend variation over periods
+In this step we will introduce a trend test to enable us recognise the trend variation over periods and eliminate ‘false exceptions’ define in the previous test. These stores are not real outliers rather than ‘exceptions’ driven by week by week spikes due to seasonality.
+
+Principles:
+We calculate parameters as a weighted average between current and previous 13 weeks
+
+Initial thresholds (Previous 13 weeks driven parameters) are defined based on the below approach
+
+CONSTRUCTING THE DIFFERENCES 
+
+Construct the difference for every week 
+
+ 
+
+Where: = 
+
+       Where: = 
+
+i = sign for the FoVa test
+j = sign for the store
+t / t-1 = current / previous week for which Dij is calculated
+
+Calculate for period t-1:
+Dij calculated for period t in sheet “Construct Diffr” and calculate by period the first (Q1), the Median (MED or Q2)  and the third quartile (Q3) of the distribution of Dij
+This data should be stored in a reference table where all periods above statistics are stored 
+
+Definition of Q1/Q3: 
+Sort Dij  / %sample (i.e. if total sample =10 then %sample=0.1) ascending using stores selling
+Accumulate %sample in a different column starting from raw1
+Q1 is accumulated 25% of “%sample” column (equal or closer to the 25% “%sample”)
+Q3 is accumulated 75% of “%sample” column (equal or closer to the 75% “%sample”)
+
+Confidence Limits calculation (based on IQR) (spreadsheet “Set Limits”) based on 13 last weeks’ calculated statistics
+
+A weighted limit is derived based on the difference of FoVa test results between periods by the following steps:
+
+Confidence Limits calculation based on past 13 weeks
+
+Follow the ASTI methodology where the target period (tp) parameter limits are calculated based on difference of the last 13 weeks/periods
+LLt1-13 = -1.9992*Median(IQR) – Max(ABS(median))
+ULt1-13 = 1.9992*Median(IQR)  +  Max(ABS(median))
+Confidence Limits calculation for CURRENT week
+Calculate the limits for each week by:
+LLt =-ABS( median) – 1.9992*IQR
+ULt = ABS(median) + 1.9992*IQR
+
+FINAL LIMITS CALCULATION for the TREND test:
+
+In current period scanning stores are received in batches (portions of 50-60 stores depending on the chain). Therefore the parameters limits calculation should be refreshed every time new stores enter in FoVa process to account for current period’s trend variation in the final parameters defined in the TREND process.
+
+For combining the previous 13 weeks calculated parameters (short term calculation) with current week’s calculated parameters a weighting function is proposed to combine initial parameter values based on 13 previous periods only together with current weeks. 
+
+This weighting function should grow when more stores are  received, must be equal to zero when no new stores are received and be maximized when all store data in tp is available. This maximum value (max_share_new) is also a free parameter, here set to 0,5 – so  weighting function produces an average of the initial MEDiqr of 13 previous periods (initial_median) and tp iqr median. 
+
+A weighting function is also proposed as the function of number of stores received at the moment. This weighting function should grow when more stores are received, must be equal to zero when no new stores are received and be maximized when all store data in current period are available. The proposed weighting function is:
+
+weight= tp_stores_receivedtp_stores_total*max⁡_share_new
+ where maximum value (max_share_new) is also a free parameter, here set to 0.5, so when all stores are received, weight will be equal to 0.5 as default. 
+The square root is taken because the variance decays as 1/sqrt(N), where N is a number of observations.
+
+HOW THE PROCESS WILL RUN:
+Stage1: Parameters are calculated initially based on the prior 13 weeks (same periods used for the longitude test for definition of parameters)
+The example in below XL ‘Example_limits_difference’ demonstrates the way this is done
+******The initial set of parameters can be calculated at the end of each WEEK together with the longitude process
+Stage2: We calculate for CURRENT WEEK the upper and lower limit and upper limit based on current weeks data
+Calculate median for current week ONLY
+Calculate IQR 
+Calculate upper and lower limit as per below formulas
+LLt =-ABS( median) – 1.9992*IQR
+ULt = ABS(median) + 1.9992*IQR
+Stage2: Combine Previous 13 weeks’ calculated limits with current weeks limits based on the formula provided in the below section
+
+How many stores we require for the calculation of final limits:
+We will initiate current week’s limits calculation when the first 60 stores are loaded in the IBD in scope,
+We will refresh the current week’s trend limits calculation with the following step:
+We go with steps of 60 stores incremental until we reach 350 stores being loaded ie. 
+When 60 additional stores are loaded we refresh current period parameters and respectively run again the weighting process using refreshed current WEEK’s new parameter and previous 13 weeks already estimated parameter values
+
+***** As indicated in the graph and table below we gradually improve the parameter estimates using current weeks data converging at 300-350 stores
+
+ Trend test parameter value vs. loaded stores current period
+
+ 
+
+FINAL LIMITS CALCULATION – TREND TEST
+To get the final limits for current week, the limits based on last 13 periods (LLt1-13, ULt1-13) and limits based on current week (LLt, ULt) are combined with a weigh parameter (weight). The final limits for the current week t is 
+LLtf = weight * LLt + (1 – weight) * LLt1-13 
+ULtf = weight* ULt + (1 – weight) * ULt1-13
+
+For testing, weight is set as 0.5 by default. 
+
+Example: South Africa, PRICESYNC test
+13 week based parameteres. 
+Blue dots – parameter values, red dots – boundaries. 
+One year data is plotted.
+
+120 stores included in parameter definition for current:
+
+all stores included in parameter definition for current:
+
+It can be seen that: 
+Combined approach (13 previous weeks + current week) parameters are more flexible and capture outlier weeks
+With selected weighting function, boundary values converge to final boundary values (when all stores in tp are received) 
+Even when only the first 60 stores for tp are received, boundary estimates are more appropriate than initial boundary values.
+
+Combining LONGITUTE and TREND test results together
+FINAL FoVa TEST RESULTS -  FLAG  OUTLIERS :
+
+Make a Judgement
+Outliers are flagged for each de-trended FoVa test parameters and the difference of FoVa test results by the two approached described above. 
+If value &lt; LL, outlier = -1, low outlier
+If value &gt;UL, outlier = 1, high outlier
+Else outlier = 0, non-outlier
+The final outlier type is based on the outlier status from the parameter test and trend test; details are stated in the table below:
+
+Parameter Test
+Trend Test
+Final Outlier Type
+-1
+-1
+-1
+-1
+0
+0
+-1
+1
+-1
+0
+-1
+0
+0
+0
+0
+0
+1
+0
+1
+-1
+1
+1
+0
+0
+1
+1
+1
+
+When a FoVa test result is identified as non-outlier by any of the two tests, its final outlier type is 0; when the outlier types from parameter test and trend test are different (rows highlighted in orange in the table above), the outlier type from the parameter test is set as the final outlier status.
+
+TREND TEST_317 – modified algorithm
+
+Current approach of calculating TREND exceptions in FoVa (test 317) has been added recently to enable validation of TREND behavior of stores and use this as a tool to identify which of the stores classified as outliers (mainly unidentified reason)  are really classified as “questionable” stores.
+The algorithm used for the trends test (TEST 317) takes last 8 weeks and calculates confidence interval assuming normality of the sales data. This approach is not adequate for the specific data given that scanning data is affected by strong seasonality over periods.
+ 
+To enable better TREND validation a new approach is proposed which recognizes the trend variation over periods by looking at the difference between 2 consequtive weeks.
+
+The new simple approach was proposed to evaluate the trend of units/value sold. This  method to derive each period TREND values  assumes n0 to be the number of units for last period, n1 – for current period. Thus 
+
+TREND variable = (n1-n0) / ( (n1+n0) / 2 )
+
+This criterion is inspired by considering period sales to be independent ‘quasi’ Poisson observations (stdev proportional to sort of expectation). According to this theory TREND values  should have a normal distribution around 0 with variance reflecting the proportionality constant.  The absolute value then has a half-normal distribution which also has a fixed mean/variance relationship (sqrt(pi/2-1)=0.755). The method was tested on real data to assess how they meet the assumption above.
+
+The distribution of TREND_ALL values
+
+Comparison with half-normal distribution with different scale constant (in green):
+
+It can be seen that a) the distribution is symmetrical and closer to normal normal in terms, b) the tail of the distribution can be better captured by half-normal distribution
+
+Outliers search comparison
+ASTI-based approach (q=0.25, q=0.1), adjusted boxplot (r=3, r=5, r=7) approach were tested on new TREND ALL values versus ASTI approach (q=0.25) on current TREND ALL values. Here are mean outlier number (and std) for each method:
+
+ 
+ASTI q=0,25
+ASTI q=0,1
+AdjBox range=3
+AdjBox range=5
+AdjBox range=7
+old methodology ASTI q=0.25
+mean
+49,44
+24,61
+78,00
+35,71
+19,61
+19,07
+std
+26,49
+6,55
+41,10
+14,90
+7,71
+15,62
+ 
+
+It is worth noting that AdjBox effectively captures outliers from skewed distributions:
+
+METHODOLOGY for TREND_317 limits calculation
+
+TREND values calculation
+Assume n0 is the number of units for last good period, n1 – for current period. Then 
+TREND_variableij = (nj-nj-1)/Avgn0n1 
+
+Where 
+i= store
+j= week
+Avgn0n1 = (n1+n0)/2 (average of the store items between the current and previous week)
+
+TREND limits calculation
+Limits are calculated each period separately for each IBD. “Sample” here means all TREND_variable  values at a particular period for particular IBD.
+The approach is based on “adjusted” boxplot technique, which is sensitive to distribution skewness and differs from conventional boxplot approach by the different length of whiskers, which define the outliers in data.
+To measure the skewness of a univariate sample {x1, . . . , xn} from a continuous unimodal distribution F, we use the medcouple (MC). It is defined as
+
+MC = med h(xi , x j ) for all xi &lt;=Q2&lt;= xj with Q2 the sample median and where for all xi &lt;&gt; xj the kernel function h is given by
+
+h(xi , xj) =((xj − Q2) − (Q2 − xi))/(xj – xi)(1)
+Given the quartiles Q1, Q3, the interquartile range IQR = Q3-Q1, and the medcouple M, the “fence” is defined, for M ≥ 0 as
+[Q1 - c*exp(a * MC)*IQR, Q3 + c*exp(b * MC)*IQR],(2)
+and for M &lt; 0 as
+[Q1 - c*exp(-b * MC)*IQR, Q3 + c*exp(-a * MC)*IQR],(3)
+and all observations x outside the fence are the “potential outliers”. 
+Here we assume 
+a = -4, 
+b = 3,
+c = 7.
+
+HOW THE MED COUBLE SHOULD BE CALCULATED (EXAMPLE) 
+
+Process description:
+The trend test (317) runs only based on current weeks data
+It can only be initiated when we have at least 30 stores loaded by IBD
+When having the first 30 stores in the IBD calculate Medcouple, Q1, Q3 and proceed with the trend evaluation of the first 30 stores)
+This process runs when all stores have been loaded and validated through the FoVa decision logic.
+This step will help us take a decision on the “non-identified” – exceptional stores define in the above step
+
+*Medcouple calculation
+MC can be calculated in R language, package “robustbase”, function called “mc” freely available.
+Code:
+function (x, na.rm = FALSE, doReflect = (length(x) &lt;= 100), eps1 = .Machine$double.eps, 
+    eps2 = .Machine$double.xmin, maxit = 100, trace.lev = 0, 
+    full.result = FALSE) 
+{
+    x &lt;- as.numeric(x)
+    ina &lt;- is.na(x)
+    if (na.rm) 
+        x &lt;- x[!ina]
+    else if (any(ina)) 
+        return(as.numeric(NA))
+    rr &lt;- mcComp(x, doReflect, eps1 = eps1, eps2 = eps2, maxit = maxit, 
+        trace.lev = trace.lev)
+    if (!(conv1 &lt;- rr[["converged"]]) | (doReflect &amp;&amp; !(conv2 &lt;- rr[["converged2"]]))) {
+        stop("mc(): not 'converged' ", if (!conv1) 
+            paste("in", rr[["iter"]], "iterations"), if (doReflect &amp;&amp; 
+            !conv2) 
+            paste(if (!conv1) 
+                " *and*", "'reflect part' in", rr[["iter2"]], 
+                "iterations"))
+    }
+    m &lt;- if (doReflect) 
+        (rr[["medc"]] - rr[["medc2"]])/2
+    else rr[["medc"]]
+    structure(m, mcComp = if (full.result) 
+        rr)
+}
+&lt;bytecode: 0x00000000087a8038&gt;
+&lt;environment: namespace:robustbase&gt;
+
+Link to package:
+https://cran.r-project.org/web/packages/robustbase/index.html
+
+FINAL DECISION ON ‘NON IDENTIFIED’ OUTLIERS
+
+The results of the 317_test (trend test) as defined above will be used for the resolution of the outliers defined as “un-identified”.
+All “un-identified” outliers will be passed through the below logic and will be classified in the newly defined buckets (see reasoning) – thus the “unidentified” reason will be used as an intermediate process where trend inspection (317_test) will be utilised for this purpose.
+
+Decision logic invoking trend test results (317_test)
+
+Specifications for the KS FoVa α parameter (dynamic definition) 
+ALPHA PARAMETER USED IN KS TESTS
+
+Structure indicators - KS parameters
+The decision making whether a store is considered to have questionable data in regards to it’s structure  is mainly driven by the  comparisons of the frequency distributions of items according to:
+Number of units sold
+Structure of the item code
+Price
+The comparisons are done by means of a Kolmogorov-Smirnov test.
+
+The KS-statistic in itself appears to be a good measure for structural changes in the data files. However, it seems that the textbook critical values for the Kolmogorov-Smirnov test are not very well adapted to our particular application. 
+Part of the problem stems from the fact that some of the assumptions of the Kolmogorov-Smirnov test are not respected/appropriate in our situation:
+Our ‘samples’ are not independent The KS critical values are however assuming both samples are independent. 
+especially for the test on units-sold the null-hypothesis of the KS-test is not appropriate. The null-hypothesis of the classical KS-test is that the two distributions are equal (it means that the KS-test on units sold is detecting all cases where there is some trend between the two weeks) As we only want to consider a store questionable when the observed trend is very extreme thus we should be looking to reject a H0: ‘data change within reasonable limits’. 
+It is because this inappropriateness of the traditional null-hypothesis for the unit sold test that the textbook critical values are much too restrictive. 
+
+Determination of critical values for the KS-test:
+The issue of the proper level of the critical values can be handled by falling back on the empirical distribution. 
+We follow the same logic as the traditional hypothesis test but we may attempt to tune the model to make it more appropriate for our situation. 
+In the traditional test the critical values are determined as percentiles on the theoretical distribution of D under the null-hypothesis of no-change. 
+Rather then picking percentiles from the theoretical distribution, we could refer to the empirical distribution of the D’s we have observed historically in our sample.
+ We could then consider only the distribution over the cases which we have not considered to be truly problematic (our new H0). 
+Critical values will be selected as percentiles from this empirical distribution. In other words, we determine critical values according to what appears to be exceptional in our cumulated experience. 
+Stage A:
+As the distribution of D in function of N does decrease monotonically, but only until a certain value of N is reached, after which the curve is flatter than one would expect according to theory ( In some cases the curve is even increasing) 
+
+KS-test for price
+
+Critical values C in function of Md(N)
+Proportion of questionables in function of Md(N)
+
+The empirical critical value P90(DS)=        1.14
+The empirical critical value P95(DS)=        1.55
+The critical value with a normal approximation (95%)=        1.29
+
+Empirical distribution of D in function of Md(N)
+
+The problem with the dependence of %Q (or D) on the size of the store (N) is lying in the formulation of the normalization factor F. 
+First, the monotonous descending pattern is only present upto a certain threshold on store size. Once we move beyond that point (in most cases about 8000/10000 items; in France about 25000) D becomes stable or will even increase.
+ Second, there is some indication that the slope of the monotonous pattern is not always proportional to Ön. 
+We could avoid these problems by generalizing the formulation of the normalization factor. According to theory we have worked with a normalization: 
+        (1)
+This threshold-issue could be handled by topping of n2 at some level a, e.g.  :
+
+Decision logic :
+Given : 
+parameters (, , a, b)
+Calculate a pair of critical values (CL, CU) as
+
+where the normalisation factor F is now defined as  :
+
+A test is flagged as questionable when:
+ 
+
+Determination of parameters :
+The new lower and upper critical values  and  are calculated by taking percentiles of D* within the non-true questionable. The specific percentiles (P95, P99, …) can be chosen according to the number of cases we want to inspect. 
+Note that D*=D/F and that therefore the percentiles depend on the value of F, and thus depend on (a, b). This will require two phases in the determination of parameters. 
+Phase I: Find values for alpha and beta.
+No analytical procedure delivering precise values for these parameters is provided. We suggest to derive the values by a visual inspection of a plot of the 90th percentile of D (within the non-true questionable) calculated within each of the deciles of n2. A SAS program for this purpose, called FINDALFA, will be made available (see appendix 1A).
+Phase II: Find upper and lower bound critical values for each of the three tests. The values  and  are calculated based on the empirical distribution of  D*=D/F (F specified according to (2)) within the historical non-true questionable store/weeks. We prefer to determine the percentiles in a more robust fashion according to a log-normal approximation of the empirical distribution (this should help to get more stability in the extreme tails of the distribution), e.g.  :
+
+ 
+where
+
+where 
+*) ,  and  are the median, the 75th and 25th percentile of the distribution of ln(D*) 
+**) za comes from the standard normal distribution and depends on the actual significance level that was chosen.
+The values a and b used in (2) are those found in the previous phase. A SAS program called FINDCVS will be made available to make the necessary calculations (see appendix 1B).
+
+AUTOMATION PROCESS FOR THE CALCUALTION OF α PARAMETER
+
+Determination of critical values for the KS-test:
+Out of 96130 records of Total Germany Groceries and 55 weeks, these are the split:
+IBD
+# of records
+GRP1_KDI_LDI
+13,874
+GRP2_LVM_VMK_VMN_VMR
+42,964
+GRP3_DRM
+20,100
+GRP4_LEH_LFI_SMG_SMK
+19,192
+Total
+96,130
+
+Steps done:
+Initiate the process by using 1 IBD
+Select last 13 available weeks
+Tabulate for each store/week the number of items handled (n2)
+For each store/week take the respective D values from KS test for Cfreq / freq_UNITS / freq_PRICE (317,318,320 test results from stat_tags file)
+From all data points, slice the data points in groups (Make groups- ventiles of 20)
+Example: Empirical Distribution D of EAN structure vs MED(NREC) by IBD / D of Price vs MED(NREC) by IBD / D of Unit vs MED(NREC) by IBD
+Example D of EAN structure vs MED(NREC) by IBD
+
+Make groups- ventiles of 20
+Derive and plot the 90th percentile of D calculated within each of the 20 equal groups of NREC as defined above.
+
+Determination of the a parameter - For each IBD, starting from median of MED(NREC):
+Calculate delta_parameter for each parameter, i.e. the ratio of change in parameter over change in MED(NREC) at each point
+Find the points of the curve which change direction from negative to positive slope
+Identify the minimum parameter of these points
+Identify MED(NREC) of the minimum parameter in (c) above
+Set ALFA to median of MED(NREC) in (d) among the three parameters
+See example below and in XL file
+21993352764790c
+00c
+22009102903855d
+00d
+19091403025140e
+00e
+23107651916430b
+00b
+
+XL table with the simulation of calculations
+
+Sas code demonstating the calculations performed:
+
+%let input_file=C:\MHM\Methods\FoVa\Germany\GROCERIES2.xlsx;
+
+/*
+NC_PERIODID
+AC_NSHOPID
+TAG_317 N_KS_CREF
+TAG_318 N_KS_PRICE
+TAG_319 N_KS_SGROUP
+TAG_320 N_KS_UNIT
+
+AC_RETAILER_GRP
+MONTH
+NREC_LOADED
+FOVA_FIN
+AC_TAGDESCRIPTION
+FOVA_START
+AC_MONITORTAGDESCRIPTION
+*/
+
+***** Graphs to evaluate alfa and beta;
+*** Make groups- deciles of N;
+
+OPTIONS MPRINT SYMBOLGEN;
+/* ods graphics off;*/
+
+PROC IMPORT
+  OUT      = WORK.Sheet1
+  DATAFILE = "&amp;input_file" 
+  DBMS     = EXCEL REPLACE;
+  SHEET    = "'GROCERIES$'"; 
+  GETNAMES = YES;
+  MIXED    = YES;
+  SCANTEXT = YES;
+  USEDATE  = YES;
+  SCANTIME = YES;
+run;
+
+proc rank data=WORK.Sheet1 out=WORK.Sheet1 groups=20;
+var NREC_LOADED;
+ranks rankNREC_LOADED;
+
+proc sort data=WORK.Sheet1; 
+by rankNREC_LOADED;
+run;
+*** Compute Ds ;
+
+proc univariate data=WORK.Sheet1 noprint;
+output out=outuni
+MEDIAN=med50  KSCREF_50 KSPRICE_50 KSUNIT_50
+P90 = dummy90 KSCREF_90 KSPRICE_90 KSUNIT_90;
+var NREC_LOADED TAG_317 TAG_318 TAG_320;
+by rankNREC_LOADED;
+run;
+
+proc export data=outuni
+(keep= rankNREC_LOADED med50 KSCREF_90 KSPRICE_90 KSUNIT_90)
+  outfile="C:\MHM\Methods\FoVa\Germany\Outuni.csv"
+  dbms=csv replace;
+run;
+
+*** print overview;
+*** Reset title;
+title "";   
+title2 "";
+
+/* Uni for GRP1_KDI_LDI*/
+
+proc rank data=WORK.Sheet1 out=GRP1 groups=20;
+var NREC_LOADED;
+where AC_RETAILER_GRP='GRP1_KDI_LDI';
+ranks rankNREC_LOADED;
+proc export data=GRP1
+(keep= rankNREC_LOADED NC_PERIODID AC_NSHOPID TAG_317 TAG_318 TAG_319 TAG_320)
+  outfile="C:\MHM\Methods\FoVa\Germany\GRP1MED.csv"
+  dbms=csv replace;
+run;
+proc sort data=GRP1; 
+by rankNREC_LOADED;
+run;
+
+proc univariate data=GRP1 noprint;
+output out=uniGRP1
+MEDIAN=med50  KSCREF_50 KSPRICE_50 KSUNIT_50
+P90 = dummy90 KSCREF_90 KSPRICE_90 KSUNIT_90;
+var NREC_LOADED TAG_317 TAG_318 TAG_320;
+by rankNREC_LOADED;
+run;
+proc export data=uniGRP1
+(keep= rankNREC_LOADED med50 KSCREF_90 KSPRICE_90 KSUNIT_90)
+  outfile="C:\MHM\Methods\FoVa\Germany\uniGRP1.csv"
+  dbms=csv replace;
+run;
+proc print data=uniGRP1;
+run;
+
+/* Uni for GRP2_LVM_VMK_VMN_VMR */
+
+proc rank data=WORK.Sheet1 out=GRP2 groups=20;
+var NREC_LOADED;
+where AC_RETAILER_GRP='GRP2_LVM_VMK_VMN_VMR';
+ranks rankNREC_LOADED;
+proc export data=GRP2
+(keep= rankNREC_LOADED NC_PERIODID AC_NSHOPID TAG_317 TAG_318 TAG_319 TAG_320)
+  outfile="C:\MHM\Methods\FoVa\Germany\GRP2MED.csv"
+  dbms=csv replace;
+run;
+proc sort data=GRP2; 
+by rankNREC_LOADED;
+run;
+
+proc univariate data=GRP2 noprint;
+output out=uniGRP2
+MEDIAN=med50  KSCREF_50 KSPRICE_50 KSUNIT_50
+P90 = dummy90 KSCREF_90 KSPRICE_90 KSUNIT_90;
+var NREC_LOADED TAG_317 TAG_318 TAG_320;
+by rankNREC_LOADED;
+run;
+proc export data=uniGRP2
+(keep= rankNREC_LOADED med50 KSCREF_90 KSPRICE_90 KSUNIT_90)
+  outfile="C:\MHM\Methods\FoVa\Germany\uniGRP2.csv"
+  dbms=csv replace;
+run;
+proc print data=uniGRP2;
+run;
+
+/* Uni for GRP3_DRM */
+
+proc rank data=WORK.Sheet1 out=GRP3 groups=20;
+var NREC_LOADED;
+where AC_RETAILER_GRP='GRP3_DRM';
+ranks rankNREC_LOADED;
+proc export data=GRP3
+(keep= rankNREC_LOADED NC_PERIODID AC_NSHOPID TAG_317 TAG_318 TAG_319 TAG_320)
+  outfile="C:\MHM\Methods\FoVa\Germany\GRP3MED.csv"
+  dbms=csv replace;
+run;
+proc sort data=GRP3; 
+by rankNREC_LOADED;
+run;
+
+proc univariate data=GRP3 noprint;
+output out=uniGRP3
+MEDIAN=med50  KSCREF_50 KSPRICE_50 KSUNIT_50
+P90 = dummy90 KSCREF_90 KSPRICE_90 KSUNIT_90;
+var NREC_LOADED TAG_317 TAG_318 TAG_320;
+by rankNREC_LOADED;
+run;
+proc export data=uniGRP3
+(keep= rankNREC_LOADED med50 KSCREF_90 KSPRICE_90 KSUNIT_90)
+  outfile="C:\MHM\Methods\FoVa\Germany\uniGRP3.csv"
+  dbms=csv replace;
+run;
+proc print data=uniGRP3;
+run;
+
+/* Uni for GRP4_LEH_LFI_SMG_SMK */
+proc rank data=WORK.Sheet1 out=GRP4 groups=20;
+var NREC_LOADED;
+where AC_RETAILER_GRP='GRP4_LEH_LFI_SMG_SMK';
+ranks rankNREC_LOADED;
+proc export data=GRP4
+(keep= rankNREC_LOADED NC_PERIODID AC_NSHOPID TAG_317 TAG_318 TAG_319 TAG_320)
+  outfile="C:\MHM\Methods\FoVa\Germany\GRP4MED.csv"
+  dbms=csv replace;
+run;
+proc sort data=GRP4; 
+by rankNREC_LOADED;
+run;
+
+proc univariate data=GRP4 noprint;
+output out=uniGRP4
+MEDIAN=med50  KSCREF_50 KSPRICE_50 KSUNIT_50
+P90 = dummy90 KSCREF_90 KSPRICE_90 KSUNIT_90;
+var NREC_LOADED TAG_317 TAG_318 TAG_320;
+by rankNREC_LOADED;
+run;
+proc export data=uniGRP4
+(keep= rankNREC_LOADED med50 KSCREF_90 KSPRICE_90 KSUNIT_90)
+  outfile="C:\MHM\Methods\FoVa\Germany\uniGRP4.csv"
+  dbms=csv replace;
+run;
+proc print data=uniGRP4;
+run;
+
+DEFINITION OF KPI’s
+Purpose of the KPI system is to provide to the system operator sufficient information on the health of the process with statistics on the stores loaded and their status.
+The process requires  an early indication of the quality of loaded data in order to react quickly and rectify possible issues occurred with scanning data .
+
+As purpose of the FoVa process is to detect issues related with the correctness and completeness of reports data identifying specific issues like:
+Truncated data,
+Identical volumetrics
+Identical prices
+It is important to create a simple and complete KPI system which will provide statistics on the above elements and provide also sufficient information on the magnitude of the problem i.e. we will be taking different actions if we know that a chain has provided identical volumetrics data for all it’s stores or for a small number of stores.
+
+Dimensions:
+By IBD / chain
+
+Statistics on loading process:
+Stores loaded vs. expected
+Questionable &amp; ok stores vs. loaded
+Questionable stores by reasoning
+
+Statistics for system health (success measure):
+Number of outliers by test 
+For historical parameters
+For longitude parameters
+Both (cross-section of both tests)
+
+Report examples
+
+IBD
+CHAIN
+Banner
+number of stores
+store status
+warning
+
+expected 
+received
+ok
+% ok
+questionable
+% quest.
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+if number of receivede vs. expected is less than X% then warn the user to contact the chainif number of questoinables &gt; 10% then warn the user if number of questionables &gt;20 then stop the process and analyse reasons for exceptions
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+IBD
+CHAIN
+Banner
+number of stores
+store status (against received)
+exception  status
+warning
+
+expected 
+received
+% ok
+% questionable 
+% idenitical vol.
+% trunc
+% identical price
+% trend
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+if % idenitical volumetirc &gt; 10% then stop the process and go back to the chain toretreive correct dataif % trunc &gt;10%  then stop the process and go back to the chain for retreiving correct data
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+

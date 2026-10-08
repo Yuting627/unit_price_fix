@@ -1,0 +1,1047 @@
+[pages=55]\n\n===== PAGE 1 =====\nItem Inspection (Draft)
+Connect Data Science
+19 February, 2026\n\n===== PAGE 2 =====\nConnect Data Science – Item Inspection (Draft)
+2
+Table of Contents
+1 II Dynamic Price and Sales Enhancement........................................................................................... 6
+1.1 1. Project Summary / Scope of the project ......................................................................................... 6
+1.1.1 1.1. Problem Opportunity Statement ................................................................................................... 6
+1.1.2 1.2. Project Scope................................................................................................................................. 6
+1.1.3 1.3. Outcome of Methods Work ........................................................................................................... 6
+1.2 2. Background revision ......................................................................................................................... 7
+1.2.1 2.1. Overview and accents ................................................................................................................... 7
+1.2.2 2.2. Process flow .................................................................................................................................. 7
+1.2.3 Calculate the values to be validated ( Sales Rate and Price Rate) .................................................. 14
+1.3 3. Dynamic Sales Rates update.......................................................................................................... 15
+1.4 4. Dynamic Price Rates update with hold on same input price rates .............................................. 15
+1.5 5. Examples ......................................................................................................................................... 16
+2 II In Sirval - Method Description ......................................................................................................... 18
+2.1 Table of Contents................................................................................................................................ 18
+2.2 Rawdata Inspection ............................................................................................................................ 18
+2.3 Item Inspection ................................................................................................................................... 18
+2.4 The ITEM_INSPECTION process........................................................................................................ 19
+2.5 Fuller: Inspection/Correction engine ................................................................................................. 19
+2.6 Fuller: Reading Store information ...................................................................................................... 20
+2.7 Fuller: Item by Item checking ............................................................................................................. 21
+2.8 Fuller: Item by Item checking (sales rates) ....................................................................................... 21
+2.9 Fuller: outlier check............................................................................................................................. 22
+2.10 Fuller: Exponential distribution........................................................................................................... 23
+2.11 Fuller: outlier check............................................................................................................................. 30
+2.12 Fuller: outlier correction (sales rates)................................................................................................ 30
+2.13 Fuller: outlier correction...................................................................................................................... 31
+2.14 Fuller: correction assessment............................................................................................................ 31
+2.15 A hand calculated Example ................................................................................................................ 34
+2.16 The RAWDATA_CORRECTIONS table ................................................................................................ 37\n\n===== PAGE 3 =====\nConnect Data Science – Item Inspection (Draft)
+3
+2.17 Parameters for ITEM_INSPECTION ................................................................................................... 37
+2.18 Item_Inspection and census .............................................................................................................. 37
+2.19 Conclusions......................................................................................................................................... 38
+3 II LDI validation and correction add-on - prices................................................................................. 39
+3.1 II LDI Validation and Correction Add-On – Prices............................................................................. 39
+3.1.1 Project Summary / Scope of the Project........................................................................................... 39
+3.1.2 Preprocess .......................................................................................................................................... 39
+3.1.3 Validation and Correction Process .................................................................................................... 41
+3.1.4 Output Data ......................................................................................................................................... 41
+4 II LDI validation and correction add-on - sales .................................................................................. 43
+4.1 Problem/ Opportunity ......................................................................................................................... 43
+4.2 Project Scope ...................................................................................................................................... 43
+4.3 Proposal............................................................................................................................................... 43
+4.3.1 Pre-process ......................................................................................................................................... 43
+4.3.2 Validation and correction during II..................................................................................................... 43
+4.4 Sales calculations ............................................................................................................................... 43
+4.4.1 Calculating differences for bounds ................................................................................................... 43
+4.4.2 Calculating bounds ............................................................................................................................. 44
+4.4.3 Calculating differences for bounds LDI items current period .......................................................... 44
+4.4.4 Outlier detection.................................................................................................................................. 45
+4.4.5 Corrections .......................................................................................................................................... 45
+4.5 New Items cross sectional validation................................................................................................ 45
+4.5.1 Detection and correction .................................................................................................................... 45
+4.6 Prices calculation................................................................................................................................ 47
+4.7 Parameters.......................................................................................................................................... 47
+4.8 Links..................................................................................................................................................... 48
+5 II SOP ................................................................................................................................................... 49
+5.1 Business Need .................................................................................................................................... 49
+5.2 High-Level Process Flow .................................................................................................................... 49
+5.3 SOP Purpose ....................................................................................................................................... 49
+5.4 SOP Process Flow Chart..................................................................................................................... 50
+5.5 Detailed Steps ..................................................................................................................................... 50\n\n===== PAGE 4 =====\nConnect Data Science – Item Inspection (Draft)
+4\n\n===== PAGE 5 =====\nConnect Data Science – Item Inspection (Draft)
+ – 5
+Item Inspection is a quality control process used to detect and correct unusual sales and price data at 
+the item level in scanned retail data. It automatically reviews weekly store data to identify outliers — 
+unusually high or low values that may be due to errors or inconsistencies.
+Here's how it works:
+ It checks for extreme values in sales rates and prices, comparing each item across multiple 
+stores in a given period.
+ The system uses statistical methods (like the Fuller algorithm) to flag and optionally correct 
+these outliers.
+ Recent improvements make this process more accurate by:
+ Repeating the correction loop to ensure consistency when multiple issues are found.
+ Applying the same correction to identical prices to avoid illogical differences in the output.
+ Dynamically updating input data after each correction to improve the next round of checks.
+This ensures that the final data used for reporting or analysis is reliable, avoiding distortions that can 
+result from raw errors or anomalies in the original retailer data.\n\n===== PAGE 6 =====\nConnect Data Science – Item Inspection (Draft)
+II Dynamic Price and Sales Enhancement – 6
+1 II Dynamic Price and Sales Enhancement
+1.1 1.   Project Summary / Scope of the project
+1.1.1 1.1. Problem Opportunity Statement
+Current version of II relies on two consecutive rates in order to determine whether correction is needed 
+or not. Inconsistent corrections are observed in cases when there is small difference between two 
+observations after the first identified for correction. In the same time when it comes to prices, equal 
+prices as input are corrected and output as different, which is not desired behavior for US team.
+1.1.2 1.2. Project Scope
+The request was to analyze the current Item Inspection methodology and to determine how to get an 
+enhancement in the procedure which will ensure consistent detection and correction on all 
+observations following the first identified as outlier.
+NB! Out of scope:
+-        Currently number of observations for detection and correction is dependent on tail size only 
+regardless of where in the set of observations the break appears
+1.1.3 1.3. Outcome of Methods Work
+As part of the request the following topics were reviewed:
+-        The statistical methodology and operational process of Item Inspection algorithm for High Sales 
+Rates; both High and Low Price Rates
+-        Simulated extreme cases examples that replicate the issue at hand
+-        Root Cause of the inconsistency for detection, based on moving difference between rates 
+differences
+The following enhancement is suggested to address the identified root cause: iterative run of the 
+process with dynamic update on the input values with the corrected ones, with constant correction for 
+same input Price Rates.
+1. Price Rates both left and right
+                                                    i.     Same corrected rate if same initial price
+                                                   ii.     No gaps in corrections (dynamic update of the tail)
+2. Sales Rates
+                                                    i.     No gaps in corrections (dynamic update of the tail)\n\n===== PAGE 7 =====\nConnect Data Science – Item Inspection (Draft)
+II Dynamic Price and Sales Enhancement – 7
+1.2 2.   Background revision
+As mentioned before, Item Inspection is a quality control process used to detect and correct unusual 
+sales and price data at the item level in scanned retail data. It automatically reviews weekly store data 
+to identify outliers — unusually high or low values that may be due to errors or inconsistencies.
+1.2.1 2.1. Overview and accents
+1. Cross – sectional outlier detection on item level and correction with Fuller engine
+2. Object of validation : Sample Scanning Data
+3. Subjects of validation (outliers detection and correction):
+                           i.      Right tail of the distribution of the sales rates
+                          ii.      Left and Right tails of the distribution of the prices
+1. Correction stage
+                           i.     Fuller algorithm for correcting outliers (if needed)
+                          ii.     Assess the impact of the expanded corrections for various IBDs
+                         iii.     Corrections applied to data directly, not thru factor (insert into 
+RAWDATA_CORRECTIONS)
+1.2.2 2.2. Process flow
+1.2.2.1 Define parameters
+II parameters - prices
+AC_PARAME
+TERTAG
+De
+fau
+lts
+Description
+AVAIL_STOR
+ES_PCT
+80 Minimum percentage of stores to be present/acceptable on the 
+rawdata
+CorrectRelse
+ExtraProm
+1.5 Extra tolerance for promotions
+CorrectRelse
+Tol_Price
+1.5 z-value for the test on price
+FilterCV_Pric
+e
+0.1
+5
+Parameter used for shrinking the coefficient of variation to the 
+prior (for checks on prices)\n\n===== PAGE 8 =====\nConnect Data Science – Item Inspection (Draft)
+II Dynamic Price and Sales Enhancement – 8
+FilterTol_Pric
+e
+2.5 Parameter used for calculating the critical ratio to the median (for 
+checks on prices)
+FullerCorrect
+Limit
+0.9 Probability level for the F-test in the Fuller outlier correction 
+procedure
+FullerDetectL
+imit
+0.9
+95
+Probability level for the F-test in the Fuller outlier detection 
+procedure
+FullerMaxTai
+l
+50 The maximum size to be considered as a tail
+Min_rel_price
+_change
+1.1 Minimal price correction (ratio between corrected and original 
+data)
+ AVAIL_STORES_PCT – expressed in %. This parameter is the minimum % of the acceptable 
+stores in the current period that must be available out of:
+ Stores that were available in raw data in the previous period.
+ Stores that are available in raw data in the current period.
+ Increasing this parameter value means we require a larger number of acceptable stores 
+from either of the two sets of stores mentioned above for running item inspection, and vice 
+versa. Suppose we have fast-changing samples from one period to another (e.g., new 
+stores opening and/or stores closing). In that case, it is advisable to use a lower value for 
+this parameter when running item inspection, for example, 60%.
+ CorrectRelseTol_Price – this parameter is used during the assessment of the significance 
+of proposed corrections on prices and the decision on whether to apply or not these 
+corrections. Basically, the decision to apply the correction is based on a comparison 
+between the correction's effect and a marginal value. If the impact exceeds the marginal 
+value, the correction is applied. The larger this parameter's value is, the larger the marginal 
+value is, and hence the greater the chance of ignoring the price correction, and vice versa.
+ FilterCV_Price – this parameter is used during the process of checking whether to inspect 
+the left/right tail of prices for outliers. The bigger the value of this parameter, the bigger the 
+chance of skipping checking for outliers and vice versa.
+ FilterTol_Price - this parameter is used during the process of checking whether to inspect 
+the left/right tail of prices for outliers. The bigger the value of this parameter the bigger the 
+chance to skip checking for outliers and vice versa (parameter has the same effect in item 
+inspection as FilterCV_Price);\n\n===== PAGE 9 =====\nConnect Data Science – Item Inspection (Draft)
+II Dynamic Price and Sales Enhancement – 9
+ CorrectRelseExtraProm – this parameter is used during the assessment of the significance 
+of proposed corrections on both sales units and prices, and the decision on whether to 
+apply or not these corrections. Its purpose is to increase further the marginal value against 
+which the effect of the proposed correction is compared; i.e., in the case of promotional 
+activities, it is natural to see larger sales, and we do not want to correct those, so we raise 
+the limit. Suppose any promo activity is observed in the data (as part of item inspection). In 
+that case, the weighted promo distribution is computed, and the proposed correction is 
+compared to a marginal value, which is additionally multiplied by the value of this 
+parameter. In the presence of promo activity, the bigger the value of this parameter, the 
+bigger the chance to ignore the correction, and vice versa. In the absence of promo activity, 
+this parameter is set to 1, and the marginal value, on which it is decided whether to apply a 
+correction, is not further boosted.
+ FullerCorrectLimit – this parameter has direct effect on the size of the correction proposed 
+for each detected outlier. It is a probability and has the same effect on the proposed 
+correction when set to p or 1-p, where p is a number between 0 and 1. For example we 
+would obtain the same result if item inspection were run with this parameter set to 0.1 and 
+0.9; 0.2 and 0.8, 0.3 and 0.7, 0.4 and 0.6. When the value of this parameter is a number 
+above 0.5, the larger it is, the larger the proposed correction is, and vice versa. Respectively, 
+when the value of this parameter is less than 0.5, the lower it is, the bigger the proposed 
+correction is. The chart below illustrates how the proposed correction changes when 
+changing the value of this parameter.
+ FullerDetectLimit- this parameter has a direct effect on the decision if a data point (store/
+nan_key sales or price) is an outlier. It is a probability and has precisely the same effect 
+\n\n===== PAGE 10 =====\nConnect Data Science – Item Inspection (Draft)
+II Dynamic Price and Sales Enhancement – 10
+when set to p or 1-p, where p is a number between 0 and 1. For example we would obtain 
+the same result if item inspection were run with this parameter set to 0.1 and 0.9; 0.2 and 
+0.8, 0.3 and 0.7, 0.4 and 0.6. When the value of this parameter is a number above 0.5, then 
+the bigger it is, the lower the chance of flagging a data point as an outlier, and vice versa. 
+Respectively, when the value of this parameter is less than 0.5, the lower it is, the bigger the 
+chance to flag a data point as an outlier. For example, if we are testing whether sales of 8 
+units are exceptional and they are not flagged as an outlier with FullerDetectLimit=0.8, but 
+we do want this to be flagged as an outlier, then we should decrease the value of this 
+parameter, but not below 0.5. Or, if we have a store with 25 sales units flagged as outliers 
+with FullerDetectLimit=0.6 and corrected, but we do not want to correct this data point, 
+then we should increase the value of this parameter.
+ FullerMaxTail – this parameter determines the maximum number of data points within 
+which to look for outliers. If we want to inspect more cases, this parameter must be set to 
+a larger value; conversely, if we want to inspect fewer cases, it must be set to a smaller 
+value.
+ Min_rel_price_change - this parameter sets up a minimum correction rate for prices below 
+which corrections are not applied, i.e., if the ratio between corrected and original sales 
+value for a given store/nan_key is below this parameter, then the price correction is not 
+applied. Since prices can be corrected on both the low and high sides, this parameter uses 
+sales value to run the check, considering sales units, where price is computed as value/
+units.
+1.2.2.2 
+II parameters - sales
+AC_PARAMETERTAG Default
+s
+Description
+ACV_AddConstant 1000 Constant used in the denominator of the calculation of the sales rates
+AVAIL_STORES_PCT 80 Minimum percentage of stores to be present/acceptable on the rawdata
+CorrectRelseExtraPro
+m
+1.5 Extra tolerance for promotions
+CorrectRelseTol_Val 1.5 z-value for the test on value
+FilterCV_Vol 0.35 Parameter used for shrinking the coefficient of variation to the prior (for 
+checks on volumes)\n\n===== PAGE 11 =====\nConnect Data Science – Item Inspection (Draft)
+II Dynamic Price and Sales Enhancement – 11
+FilterTol_Vol 2.5 Parameter used for calculating the critical ratio to the median (for checks 
+on volumes)
+FullerCorrectLimit 0.9 Probability level for the F-test in the Fuller outlier correction procedure
+FullerDetectLimit 0.995 Probability level for the F-test in the Fuller outlier detection procedure
+FullerMaxTail 50 The maximum size to be considered as a tail
+Min_max_volume 10 Minimal sales to run the inspection for
+Min_rel_vol_change 1.1 Minimal sales correction (ratio between corrected and original data)
+ ACV_AddConstant – this parameter has no direct effect on the inspection process and 
+proposed corrections. It is used during the transformation of sales units of each store/nan_key 
+before running the inspection.
+ AVAIL_STORES_PCT – expressed in %. This parameter is the minimum % of the acceptable 
+stores in the current period that must be available out of:
+ Stores that were available in raw data in the previous period;
+ Stores that are available in raw data in the current period;
+Increasing this parameter value means we require a larger number of acceptable stores from either of 
+the two sets of stores mentioned above for running item inspection, and vice versa. I.e., suppose we 
+have fast-changing samples from one period to another (e.g., new stores opening and/or stores 
+closing). In that case, it is advisable to use a lower value for this parameter when running item 
+inspection, for example, 60%.
+ CorrectRelseExtraProm – this parameter is used during the assessment of the significance of 
+proposed corrections on both sales units and prices, and the decision on whether to apply or not 
+these corrections. Its purpose is to increase further the marginal value against which the effect 
+of the proposed correction is compared; i.e., in the case of promotional activities, it is natural to 
+have higher sales, and we do not want to correct those, so we raise the limit. Suppose any 
+promo activity is observed in the data (as part of item inspection). In that case, the weighted 
+promo distribution is computed, and the proposed correction is compared to a marginal value, 
+which is additionally multiplied by the value of this parameter. In the presence of promo activity, 
+the bigger the value of this parameter, the bigger the chance to ignore the correction, and vice 
+versa. In the absence of promo activity, this parameter is set to 1, and the marginal value, on 
+which it is decided whether to apply a correction, is not further boosted.\n\n===== PAGE 12 =====\nConnect Data Science – Item Inspection (Draft)
+II Dynamic Price and Sales Enhancement – 12
+ CorrectRelseTol_Val - this parameter is used during the assessment of the significance of 
+proposed corrections on sales and the decision on whether to apply or not these corrections. 
+Basically, the decision to apply the correction is based on a comparison between the 
+correction's effect and a marginal value. If the impact exceeds the marginal value, the correction 
+is applied. The larger this parameter's value is, the larger the marginal value is, and hence the 
+greater the chance of ignoring the sales correction, and vice versa.
+ FilterCV_Vol - this parameter is used during the process of checking whether to inspect the right 
+tail of sales for outliers. The bigger the value of this parameter, the bigger the chance of 
+skipping checking for outliers and vice versa.
+ FilterTol_Vol - this parameter is used during the process of checking whether to inspect the right 
+tail of sales for outliers. The bigger the value of this parameter, the bigger the chance to skip 
+checking for outliers and vice versa (parameter has the same effect in item inspection as 
+FilterCV_Vol).
+ FullerCorrectLimit – this parameter has a direct effect on the size of the correction proposed for 
+each detected outlier. It is a probability and has precisely the same impact on the suggested 
+correction when set to either p or 1-p, where p is a number between 0 and 1. For example, we 
+would obtain the same result if item inspection is run with this parameter set to 0.1 and 0.9; 0.2 
+and 0.8, 0.3 and 0.7, 0.4 and 0.6. When the value of this parameter is a number above 0.5, then 
+the bigger it is, the bigger the proposed correction is, and vice versa. Respectively, when the 
+value of this parameter is less than 0.5, the lower it is, the bigger the proposed correction is. The 
+chart below illustrates how the proposed correction changes as the value of this parameter is 
+varied.\n\n===== PAGE 13 =====\nConnect Data Science – Item Inspection (Draft)
+II Dynamic Price and Sales Enhancement – 13
+ FullerDetectLimit- this parameter has a direct effect on the decision if a data point (store/
+nan_key sales or price) is an outlier. It is a probability and has precisely the same effect when 
+set to p or 1-p, where p is a number between 0 and 1. For example, we would obtain the same 
+result if item inspection is run with this parameter set to 0.1 and 0.9; 0.2 and 0.8, 0.3 and 0.7, 0.4 
+and 0.6. When the value of this parameter is a number above 0.5, then the bigger it is, the lower 
+the chance of flagging a data point as an outlier, and vice versa. Respectively, when the value of 
+this parameter is less than 0.5, the lower it is, the greater the chance of flagging a data point as 
+an outlier. For example, if we are testing whether sales of 8 units are exceptional and they are 
+not flagged as an outlier with FullerDetectLimit=0.8, but we do want this to be flagged as an 
+outlier, then we should decrease the value of this parameter, but not below 0.5. Or, if we have a 
+store with 25 sales units flagged as outliers with FullerDetectLimit=0.6 and corrected, but we do 
+not want to correct this data point, then we should increase the value of this parameter.
+ FullerMaxTail – this parameter determines the maximum number of data points within which to 
+look for outliers. If we want to inspect more cases, this parameter has to be set to a larger value, 
+and vice versa.
+\n\n===== PAGE 14 =====\nConnect Data Science – Item Inspection (Draft)
+II Dynamic Price and Sales Enhancement – 14
+ Min_max_volume – this parameter determines the minimal threshold of sales below which item 
+inspection will not run, i.e., item inspection will skip any nan_key, for which the maximum sales 
+across all stores are lower than this parameter. If we want to inspect only the nan_keys with 
+high sales, we should set this value to a high number; otherwise, we should set it to a low 
+number.
+ Min_rel_vol_change – this parameter sets up a minimum correction rate for sales below which 
+corrections are not applied, i.e., if the ratio between corrected and original sales for a given 
+store/nan_key is below this parameter, then the sales correction is not applied.
+1.2.3 Calculate the values to be validated ( Sales Rate and Price Rate)
+                 i.    
+                ii.    
+Calculate min, max, median, 1st and 3rd quartile, OCV, SCV
+Where:
+OCV - Observed CV based on IQR
+Q1 – 1st quartile
+Q3 – 3rd quartile
+Q2 – median
+\n\n===== PAGE 15 =====\nConnect Data Science – Item Inspection (Draft)
+II Dynamic Price and Sales Enhancement – 15
+Where:
+FilterCV_Price/FilterCV_Vol – is predefined parameter. This parameter is used during the process of 
+checking whether to inspect the left/right tail of prices (right tail of Sales rates resp.) for outliers. The 
+bigger the value of this parameter the bigger the chance to skip checking for outliers and vice versa
+n – Number of observations
+Define tail length to inspect – up to predefined parameter( currently 50)
+Define number of observations from the tail to test for correction – if less than 6 obs in tail – 1; if less 
+than 15 – 2; else 1/10 of number of observations in tail(floored)
+Calculations (refer to attachment)
+                                                    i.     estimates needed for the test statistics – b, b1,  b2
+                                                   ii.     Calculate the Fval observed
+                                                  iii.     Calculate Fcrit
+                                                  iv.     Calculate Fcorrect
+                                                  v.     Calculate expected gap
+                                                 vi.     Apply correction
+1.3 3.   Dynamic Sales Rates update
+The enhancement is affecting the first stage of II process (Fuller: Inspection/Correction engine) by 
+adding iterative element for the engine run. The process is run as many times as many observations 
+where calculated to be inspected. If correction is proposed for the first observation from the list, in the 
+second run the corrected value will be placed as input value. And so on and so forth.
+1.4 4.   Dynamic Price Rates update with hold on same input price 
+rates
+For the price rates the enhancement is taking same logic as for the sales rates but at the same time it 
+is accounting for equal input prices. In case of two or more consecutive observations with the same 
+input price value – the same correction is applied to the following one or more observations, thus 
+\n\n===== PAGE 16 =====\nConnect Data Science – Item Inspection (Draft)
+II Dynamic Price and Sales Enhancement – 16
+keeping the output prices equal. Fuller Detection Engine is run iteratively as many times as number of 
+observations to check in tail.
+1.5 5.    Examples
+Price Rates – current process tail to inspect/correct
+AC_NSHOPID F_NAN_KEY NC_SALES NC_PRICE C_PRICE AC_IBD
+280003N916 12886395 1 37 21.06 SFLG:3
+280003N916 12886395 1 37 37 SFLG:3
+280001NJ27 12886395 1 38 38 SFLG:3
+280001NJ27 12886395 1 98 42.68 SFLG:3
+980004CY56 12886395 1 256 113.05 SFLG:3
+Price Rates dynamic update – result tail inspect/correct
+NC_PERIODID AC_NSHOPID F_NAN_KEY NC_SALES NC_PRICE C_PRICE
+1720 280003N916 12886395 1 37 21.06
+1720 280003N916 12886395 1 37 21.06
+1720 280001NJ27 12886395 1 38 22.83
+1720 280001NJ27 12886395 1 98 25.56
+1720 980004CY56 12886395 1 256 31.18
+For step by step please refer to step by step in attached document.\n\n===== PAGE 17 =====\nConnect Data Science – Item Inspection (Draft)
+II Dynamic Price and Sales Enhancement – 17
+Tech: R
+Scripts : link1
+1. https://drive.google.com/open?id=1QrnvDk-52yRuctjcdGE6tEaNYqQpkKhc\n\n===== PAGE 18 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 18
+2 II In Sirval - Method Description
+2.1 Table of Contents
+ Raw data Inspection
+ Item Inspection
+ Fuller-engine
+ Raw data Corrections table
+ Parameters for Item Inspection
+ Conclusion
+2.2 Rawdata Inspection
+Sirval has two processes to inspect the Rawdata at the shop level:
+1. FOVA: Formal Validation of Volumetric Data
+2. CFOVA: Formal Validation of Causal data
+Sirval has three processes to inspect the rawdata below the shop level:
+1. PSG: Cross-sectional check of Price variation at the item-level
+2. ITEM_INSPECTION:
+a. Cross-sectional outlier detection at the item level
+b. Correction
+3. MODULE_INSPECTION: (NIY)
+a. Cross-sectional outlier detection at the module level
+b. No Correction
+2.3 Item Inspection
+ Cross-sectional
+ Outlier detection and correction with Fuller
+ Impact assessment on EBDs
+ two possible sources of inspection:
+ Rawdata: Inspect all items on the Rawdata:
+i. 1 period
+ii. Store Filter\n\n===== PAGE 19 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 19
+iii. Module Filter
+ Inquiry table: Cfr. above, but only inspect those items that were put on the Inquiry table (NIY)
+2.4 The ITEM_INSPECTION process
+Process Flow:
+ Fetch parameter values
+ Resolve Store filter
+ Pick up filtered acceptable stores
+ Some checks on %acceptable stores compared to:
+ Received stores
+ Previous period
+ Resolve module filter
+ Pick up Volumetric Rawdata (period, selected stores, selected modules)
+ Set the Causal flag for each item (period shop) for which there is causal activity for that Nan 
+(period, shop)
+ Launch the FULLER inspection/correction engine by passing:
+ Parameters
+ Selected Stores
+ Selected Rawdata
+2.5 Fuller: Inspection/Correction engine
+ Used by 2 processes
+ ITEM_INSPECTION
+ MODULE_INSPECTION
+ Programmed in JAVA (not PL/SQL)
+ The FULLER engine:
+ Pre-processing
+ Uses Fuller’s algorithm for finding outliers
+ Uses Fuller’s algorithm for correcting outliers (if that is needed, cfr. Item_inspection)
+ assesses the impact of the (expanded) corrections for various EBD’s.
+ Inserts “significant” corrections in the RAWDATA_CORRECTIONS table
+ Process flow:
+Reading store information (= loop over stores)\n\n===== PAGE 20 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 20
+ Build Cells
+ Build IBD’s
+Item by Item checking (=loop over items):
+ Check:
+ Check Right-tail of the distribution of the sales rates (=1000 x Units/(ACV + 
+ACV_add_constant))
+ Check Right-tail of the distribution of the prices
+ Check the Left-tail of the distribution of the prices
+ Propose corrections
+ Assess impact of corrections
+ Insert into RAWDATA_CORRECTIONS
+2.6 Fuller: Reading Store information
+Note 1: CellsAcv and Cell Universe ACV are cumulative per cell
+Note 2: IBD’s defined by a parameter listing stores fields
+\n\n===== PAGE 21 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 21
+Note: Cell X-factors are recalculated as CellUAcv/CellSAcv
+2.7 Fuller: Item by Item checking
+Note: under VOLUMES are the sales rates
+         =1000xUnits/(ACV+ACV_ADDconstant)
+2.8 Fuller: Item by Item checking (sales rates)
+ If too few observations: skip
+ If no variation: skip
+ Compute:
+ Q0: minimum
+\n\n===== PAGE 22 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 22
+ Q1: first quartile
+ Q2: median
+ Q3: third quartile
+ Q4: maximum
+ Estimate coefficient of variation via interquartile range and median:
+ OCV=(Q3-Q1)/(1.34898 x Q2)
+ Shrink to prior
+ Compute critical ratio to the median
+If maximum > Median x Critical_Ratio_to_the_median then check for outliers on the right tail (=about 
+1/3 of the total distribution), otherwise skip.
+ Note 1: For prices both sides of the distributions are tested. The test on the left tail is by 
+evaluating Median / Minimum
+ Note 2: If outlier check is needed some parameters of the Weibull distribution for the 
+observations in the tail are printed (regression of the order statistics). This can be used to 
+assess whether the assumption of an exponential distribution holds
+ Note 3: The number of outliers to check for is determined
+2.9 Fuller: outlier check
+ If tail it too small: skip
+ If tail has no variation: skip
+ LOOP over the number of outliers that we need to check for:
+ Assume an exponential distribution (in the tail)
+ Consider the gaps between points
+ Compute test statistic
+ Evaluate test statistic to a F-distribution\n\n===== PAGE 23 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 23
+2.10 Fuller: Exponential distribution
+If we have a sample of size n, how can we estimate b?
+Just take the average:
+\n\n===== PAGE 24 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 24
+In this case: 3.861186
+To demonstrate that this works in general, this has been replicated 1000 times, yielding the following 
+distribution
+There are alternative estimators for b. Consider for instance the gaps between the order statistics:
+The i-th order statistic here simply means the i-th element after all elements were ordered from the low 
+to high. Doing the same exercise gives:
+\n\n===== PAGE 25 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 25
+An estimator for b, based on the first n-1 order statistics (slightly shrinked to the average to avoid 
+division by zero) is:
+Disregarding the shrinkage here, we can do the same exercise as above. This time we don’t plot b1 as 
+such, but:  which can be shown to follow a Chi-square distribution with 2(n-2) 
+degrees of freedom:
+\n\n===== PAGE 26 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 26
+Somewhat surprisingly, simply taking the gap between the last two order statistics gives an estimator 
+for b:
+In sirval this estimator is shrinked to the average  (to avoid division by zero) : 
+Disregarding the shrinkage we can repeat the exercise
+Note that the values of this estimator varies more, but the mean of the estimates seems to be OK.
+\n\n===== PAGE 27 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 27
+ 
+It can be shown that:  follows a Chi-square distribution with 2 degrees of freedom:
+\n\n===== PAGE 28 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 28
+The ratio of b2 and b1 can be shown to be F-distributed with respectively 2 and 2(n-2) degrees of 
+freedom.
+This allows us to specify a critical value for the test statistic in order to test whether the extreme tail of 
+the distribution is in line with the expectations according to an exponential distribution.
+In area 1 we currently we use a probability level of 0.995.
+Notice also that in Sirval we use 2(n-2) –0.5 degrees of freedom for the denominator to become more 
+tolerant for very small n.
+\n\n===== PAGE 29 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 29
+If the test-statistic is more than the critical value a correction is proposed based on an expected gap
+as:
+in which Crit_F is a critical value on the F-distribution with 2 and 2(n-2) degrees of freedom.
+Note that the probability level for the critical value for a correction does not have to be the same as the 
+one used for detection.
+ QUESTION: That’s all very fine as long as the distribution I’m interested in is exponentially 
+distributed and this is seldom the case in our business. Is the usefulness of Fuller not  very 
+limited from this perspective?
+ ANSWER: The TAIL of the distribution you’re interested in can often be approximated by an 
+exponential distribution (cfr. Ludo’s document).
+ Note: The previous explanation can easily be generalized to more than 1 outlier
+ Note: See hand calculated example later
+\n\n===== PAGE 30 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 30
+2.11 Fuller: outlier check
+Note: No outlier according to Fuller. Here this fact suppresses the relevant output (SW was adapted).
+2.12 Fuller: outlier correction (sales rates)
+ If previous test signals « significance » a corrected value (in this case a corrected sales-rate) 
+is proposed using the value we would expect (winsorizing the gap)
+ If there are proposed corrections then:
+ translate the proposed corrected sales rates back to units (=New Sales_rate x (ACV + 
+acv_addconstant ) / 1000 )
+ Test whether current units are integers. If yes then randomround
+ Recalculate the value by imposing the old price
+ The proposed correction will then be evaluated by assessing its impact on projected 
+figures (cfr. Later)
+\n\n===== PAGE 31 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 31
+2.13 Fuller: outlier correction
+2.14 Fuller: correction assessment
+ If a correction was proposed its impact is assessed by looking at the effect on expanded
+figures for the different participating IBD’s.
+ LOOP over IBD’s and compute for each IBD:
+ winsorized projected total value + relative standard error
+ winsorized projected total number of units + relse
+ projected price (projected total value / projected total number of units) + relse
+ projected ACV weighted selling distribution
+ projected ACV weighted promo distribution
+ number of stores selling
+ total number of stores in sample
+ Check whether the corrections above are « significant » by looping over all stores with a 
+correction and for each of these stores we loop over the relevant IBD’s. If they are significant
+for 1 or more IBD’s then it will be applied:
+ ValDiff=xf*(original_val-corr_val) / proj_total_val_IBD
+ VolDiff=xf*(original_vol-corr_vol) / proj_total_vol_IBD
+ PDiff=(1+ValDiff)/(1+VolDiff)-1
+ Compute extra tolerance if item has promotional activity
+ TolVal=z_value_val x relse_val_Ibd x Extra_Tol
+ TolPrice=z_value_price x relse_price_Ibd x Extra_Tol
+ If abs(ValDiff > TolVal) then SIGNIFICANT
+ If abs(Pdiff > TolPrice) then SIGNIFICANT
+\n\n===== PAGE 32 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 32
+Note: If Verbose=0 the Reports only contain assessed items
+\n\n===== PAGE 33 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 33
+\n\n===== PAGE 34 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 34
+2.15 A hand calculated Example
+Note: (100 x 1000)/(363 + 1000) = 73.37
+Note: 73.37/12.07=6.080 > 1.834: Let Fuller check for outlier(s)
+\n\n===== PAGE 35 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 35
+Note: No price problems
+\n\n===== PAGE 36 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 36
+Note: 2 other participating IBDs are the same as TOTAL
+Note 1: 0.495=(326.27-88.09)x60.03/28859.86
+Note 2: 0.183=1.5 x 0.1223 x 1
+Conclusion: 0.495 > 0.183 => Effect for Total IBD
+\n\n===== PAGE 37 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 37
+2.16 The RAWDATA_CORRECTIONS table
+Note: This is an excerpt. Field names were changed/dropped
+2.17 Parameters for ITEM_INSPECTION
+2.18 Item_Inspection and census
+ In census stores we:
+ Don’t want to correct atypical observations
+\n\n===== PAGE 38 =====\nConnect Data Science – Item Inspection (Draft)
+II In Sirval - Method Description – 38
+ In the case of sample we want to avoid projecting atypical atypical observations in 
+case were we think the atypical observation does not represent ZF stores in the 
+population.
+ Want to correct mistakes in the data
+ Even in the case of census we want to correct figures that are clearly completely 
+wrong
+ What happens if we do nothing?
+ Census stores have XF=1 and thus are unlikely to pass the “significance editing”
+ Census stores also means the N increases and that thus they are more likely to become 
+significant 
+ How can we judge the total effect ?
+ Remember that we have ‘significance’ if: xf x (original_val-corr_val) / proj_total_val_IBD >= 
+z_value_val x relse_val_Ibd x Extra_Tol
+ Let’s simplify the notation:
+ Xf:=>n/N
+ z_value_val=> z
+ relse_val_Ibd=>cv/sqrt(n)
+ (original_val-corr_val)=>correction=>c
+ proj_total_val_IBD=> Winsorized total=>w
+2.19 Conclusions
+ Developments are ongoing:
+ Optimization of SQL
+ Use of the Inquiry table
+ Module_Inspection
+ Processing the Rawdata_corrections
+ In principle fully automatic
+ Comparison corrections with legacy system (BE) difficult but relatively positive\n\n===== PAGE 39 =====\nConnect Data Science – Item Inspection (Draft)
+II LDI validation and correction add-on - prices – 39
+3 II LDI validation and correction add-on - prices
+3.1 II LDI Validation and Correction Add-On – Prices
+3.1.1 Project Summary / Scope of the Project
+Item inspection in SirVal bypasses UPCs that have five stores or fewer selling in a given week and IBD. 
+To ensure data quality, we need an additional step to handle such cases.
+3.1.1.1 Proposal
+The proposal relies on a cross-sectional type of validation given the nature of price behavior. This is an 
+adapted cross-sectional analysis designed to ensure faster processing and prevent delays in process 
+completion.
+3.1.2 Preprocess
+It is advisable to run the bounds after all validation steps are performed and save the result in a 
+reference table.
+The process for determining inspection limits runs on the last available period, based on the T period 
+(T+1 being the period for which these limits will be used for inspection). We initiate the process by 
+selecting one IBD / category / store. Once the process is complete, we proceed to the next category 
+until all categories have been processed and inspection limits are calculated.
+3.1.2.1 Data Selection
+The following data must be present for both the period under inspection and the previous period:
+ PERIODID
+ IBDID
+ STOREID / STORECODE
+ CATEGORYID / PC
+ MANUFACTURER / MANU
+ BRAND / BRN
+ PACK WEIGHT / WT1A
+ MEASUREMENT UNIT / UNU
+ ITEMCODE / P_CODE / NAN_KEY
+ NC_PRICE (for period T must be the final price used for production/BAU reporting)\n\n===== PAGE 40 =====\nConnect Data Science – Item Inspection (Draft)
+II LDI validation and correction add-on - prices – 40
+3.1.2.2 Calculations
+Two prices are calculated and validated:
+Price:
+price_ij = NC_SLOT2_ij / (NC_SLOT1_ij × NC_CONV_ij)
+Normalized Price:
+norm_price_ij = NC_SLOT2_ij / (NC_SLOT1_ij × NC_CONV_ij × WT1a_i)
+Where:
+ i = sign for the item (P_code)
+ j = sign for the store
+ NC_SLOT2: sales value
+ NC_SLOT1: sales units
+ NC_CONV: unit conversion factor
+ WT1a: pack size or weight
+3.1.2.3 Calculating Limits and Distribution
+The limits and distribution are calculated iteratively on several levels:
+1. CATEGORY, UNU, WT1A, MANU, BRAND, IBDCODE
+2. CATEGORY, UNU, WT1A, MANU, BRAND
+3. CATEGORY, UNU, WT1A, MANU
+4. CATEGORY, UNU, WT1A
+5. CATEGORY, UNU
+Note: CATEGORY and UNU must be included at all levels.
+For each level:
+ Filter v_prices (prices > min_price, default = 0)
+ Compute:
+ t_perc_ll = q_low quantile (v_prices)
+ t_perc_ul = q_high quantile (v_prices)
+ ND = Numeric Distribution = count(prices > min_price)
+Where:
+q_low = q_per , q_high = 1 - q_per , with default q_per = 0.05
+If WT1A is not available, v_prices will be norm_prices, but filtering still applies to the raw price.\n\n===== PAGE 41 =====\nConnect Data Science – Item Inspection (Draft)
+II LDI validation and correction add-on - prices – 41
+3.1.3 Validation and Correction Process
+ Calculate NDIBD_i  = number of stores with sales > 0 for the item code in the IBD.
+ Items are selected for validation if NDIBD_i ≤ ldi_tresh  (default = 5).
+ For each flagged observation (LDI), assign upper and lower limits from the preprocessing step.
+ Use the first level with ≥ 30 valid observations.
+ If using normalized prices, the limit is adjusted by multiplying it by the observation’s WT1A.
+3.1.3.1 Outlier Identification
+A price is considered an outlier if:
+ price > upper_limit → high_outlier
+ price < lower_limit → low_outlier
+3.1.3.2 Correction Logic
+ If low_outlier → corrected_price = lower_limit
+ If high_outlier → corrected_price = upper_limit
+3.1.3.3 Parameters for Correction Rules
+Parameter Default Description
+adj_direction 3 Direction filter: 1 = ignore low, 2 = ignore high, 3 = correct both
+min_init_price 0 Minimum price to apply correction
+corr_abs_diff 0 Minimum absolute difference to apply correction
+min_ratio 1 Minimum relative difference to apply correction
+3.1.4 Output Data
+Each correction will generate the following fields:
+ PERIODID
+ STOREID / STORECODE
+ ITEMCODE / P_CODE / NAN_KEY\n\n===== PAGE 42 =====\nConnect Data Science – Item Inspection (Draft)
+II LDI validation and correction add-on - prices – 42
+ PRICE
+ NEW PRICE
+ RATIO
+ Numeric Distribution
+ Applied Bound
+ Outlier flag\n\n===== PAGE 43 =====\nConnect Data Science – Item Inspection (Draft)
+II LDI validation and correction add-on - sales – 43
+4 II LDI validation and correction add-on - sales
+4.1 Problem/ Opportunity
+Introduce into Item Inspection a new algorithm to detect outliers also in case of IBDs with less than a minimum number of 
+observations. Currently in case the number Shop items within an IBD is less than 5 the identified corrections are not 
+applied. 
+4.2 Project Scope
+Scope is to identify and correct store items with low distribution.
+4.3 Proposal
+The process runs on two stages - pre-process and validation and correction during II.
+4.3.1 Pre-process
+Pre-process operates on data of current and 2 previous period data to generate bounds & cutoffs to be 
+used into current period T. It means pre-process, to generate data usable into current period T, has to 
+be executed on data of the previous 2 periods (T-1 & T-2) using consolidated data. Process has to be 
+executed any time before running the item inspection for the period.
+4.3.2 Validation and correction during II
+After the core II process is done a check for LDI items is performed and for all items flagged as LDI distances are 
+recalculated. Based on them further decisions are made.
+4.4 Sales calculations
+4.4.1 Calculating differences for bounds
+\n\n===== PAGE 44 =====\nConnect Data Science – Item Inspection (Draft)
+II LDI validation and correction add-on - sales – 44
+Where:
+Salesij = sales units (Converted Units (NC_SLOT1*NC_CONV))
+i = sign for the item (f_nan_key)
+j = sign for the store
+T-1 = previous period
+T-2 = period before previous period
+4.4.2 Calculating bounds
+The bounds are calculated during the pre-process stage only. In order to calculate limits and bounds 
+we need to:
+ Calculate statistics – once on CAT/IBD (bounds) and once on CAT only level (catbounds) - using 
+the Dij calculated above and calculate the first (Q1), the Median (MED or Q2)  and the third 
+quartile (Q3) of the distribution of Dij (only non-zero values of dij participate)  and IQR( Q3 – Q1) 
+and handling(count).
+ Calculate bounds – must calculate cat/ibd bound and catbound independently using the 
+following formula:
+ 
+ If the handling in cat/ibd  group is less than 5, then instead of bounds – catbounds are used.
+ Calculate Numeric Distribution on IBD/f_nan_key level – NDIBD_i, number of stores with sales > 
+0, for the itemcode in IBD
+For the current period after running ii a check for the LDI items is performed. For items which 
+distribution in ibd is less than ldi_tresh differences are recalculated and those differences are then 
+compared to the calculated bounds during the pre-process. 
+4.4.3 Calculating differences for bounds LDI items current period
+Where Sales are the Converted Units (NC_SLOT1*NC_CONV)
+T = current period
+\n\n===== PAGE 45 =====\nConnect Data Science – Item Inspection (Draft)
+II LDI validation and correction add-on - sales – 45
+T-1 = previous period 
+ij is the item I within Store J
+4.4.4 Outlier detection
+A store / item has to be considered outlier if the absolute value of the difference is greater than the 
+absolute value of the bound calculated by the preprocess.
+4.4.5 Corrections
+Based on the above calculations we apply correction to all identified outliers following the below 
+formula:
+4.5 New Items cross sectional validation
+As the algorithm calculates difference (Dij) and further on applies correction on storecode-itemcode 
+level, it is highly likely new item (for the store) to be smoothed even if the sold units are acceptable. 
+This validation is active and could be used only for countries which run and maintain item activity 
+process.
+To detect if the new item within the store will be treated as an outlier cross sectional validation on the 
+volume is used. The groups for analysis and comparison are built on two levels:
+-          IBD-CAT-MAN-BRN
+-          IBD-CAT (if on the first level we have less than certain number of observations 
+(newitem_min_obs= 30))
+Volume = Sales * WT1A
+Where:
+Sales = sales units (Converted Units (NC_SLOT1*NC_CONV))
+WT1A = weight multiplier, actual weight, quantity etc.
+4.5.1 Detection and correction
+-  Cutoff estimation: For each group 95 percentile of the volume is calculated. If IBD-CAT-MAN-BRN 
+has less than certain number of observations (newitem_min_obs= 30), the cutoff calculated at IBD-
+CAT is used instead.
+\n\n===== PAGE 46 =====\nConnect Data Science – Item Inspection (Draft)
+II LDI validation and correction add-on - sales – 46
+Note: Each observation is an individual volume, for all sales volumes higher than 0 in ascending order. 
+When the desired quantile lies between two data points i and j, the method of interpolation used is 
+linear: i + (j - i) * fraction, where fraction is the fractional part of the index
+-  Correction: Three conditions are checked in order observation to be corrected:
+ Observation is confirmed as new (flag > 0)
+ Its volume is higher than the cutoff
+ It has been identified as outlier in the main  II LDI algorithm
+If all those conditions are met, the observation is corrected to have volume = cutoff and its sales are 
+recalculated to follow:
+ni_corr_sales = cutoff / WT1A /  NC_CONV
+If the observation is confirmed as new, was initially proposed for correction by II LDI algorithm, but its 
+volume is lower than cutoff, then its sales are reversed to their initial value (Sales)
+Additional control on corrections
+Couple of parameters are introduced to further control whether the corrections will be applied or not:
+ adj_direction - It is a new Parameter used to drive the final selection of the corrections to 
+perform.
+Correction Size = Initial Sales Units – New Sales Units
+adj_direction Check Action
+1 Correction size <0 Ignore correction
+2 Correction size > 0 Ignore correction
+3 Proceed using all new calculated units
+Values of the new parameter are :
+1 : Apply only corrections where new Units are greater than the original one
+2 : Apply only corrections where new Units are less than the original one
+3 : Apply all detected corrections
+ min_init_sales - if the initial sales are less than or equal to that parameter no corrections will be 
+applied
+ corr_abs_diff  
+corr_abs_diff = abs(corr_sales - sales)\n\n===== PAGE 47 =====\nConnect Data Science – Item Inspection (Draft)
+II LDI validation and correction add-on - sales – 47
+ corr_rel_diff
+corr_rel_diff = (sales / corr_sales) -1
+4.6 Prices calculation
+in development
+4.7 Parameters
+AC_PARAMETERTAG  Defaults  Description
+ldi_tresh 5 Max Numeric distribution to define LDI
+minimum_bound 4.5 Minimum Bound Value to assign
+ldi_bound_coeff 1.9992 Coefficient used to calculate the Bound
+ 
+ldi_minibd_hndl 5 minimum number of handlers by IBD/Module to use
+  the bounds on IBD level
+min_init_sales 50 Minimum initial sales
+corr_abs_diff 50 Absolute Difference
+corr_rel_diff 20 Relative Difference
+adj_direction 3 To drive actions in case of positive or negative difference
+newitem_min_obs 30 minimum number of handlers by  IBD/Module/Manufacturer/Brand to 
+use the cutoffs on IBD/Module level
+ ldi_tresh- max numerical distribution to identify low distributed items. It is calculated on the 
+Total Country / Item Inspection filter session run. \n\n===== PAGE 48 =====\nConnect Data Science – Item Inspection (Draft)
+II LDI validation and correction add-on - sales – 48
+ minimum_bound- It is a parameter to define the minimum Bound Value to assign. If the 
+calculated bound is lower than that parameter this value will be used as bound to identify if the 
+sales distance is outlier or not. 
+ ldi_bound_coeff - default of 1.9992. This coefficient controls the sensitivity of the range and 
+hence the decision rule. A bigger scale would make the outliers to be considered as data points 
+while a smaller one would make some of the data points to be perceived as outliers. Also the 
+calculated bound at the end affects the correction size.
+ ldi_minibd_hndl - two sets of bounds are calculated - one on item/IBD (bound) and one on cat/
+IBD (cat bound). If the handlers on an item are less than this parameter the catbound will be 
+used instead. 
+ min_init_sales - if the initial sales are less than that parameter any correction will be ignored
+ corr_abs_diff - if the correction size is less than that parameter the correction will be ignored
+ corr_rel_diff - if the relative difference between initial sales and corrected sales is less than that 
+parameter the correction will be ignored
+4.8 Links
+  AppDev DM document
+2
+2. https://docs.google.com/document/d/1yy5_8ZNVZNB_UuIV25urmhg9XBRh2TNqxkdDt09hWFI/edit\n\n===== PAGE 49 =====\nConnect Data Science – Item Inspection (Draft)
+II SOP – 49
+5 II SOP
+5.1 Business Need
+The purpose of this page is to provide the Standard Operating Procedure for processing Item 
+Inspection:
+ Item Inspection
+ Raw data correction (because of Item Inspection)
+Incoming retailer data can contain extreme sales/prices at the item level.
+In a sample environment, these outliers and errors must be corrected to avoid mistakes in the 
+extrapolated data. In a census environment, only obvious errors in volumes/prices are corrected.
+The process of detecting such outliers in price and volume is Item Inspection.
+The corrections proposed by the Item Inspection process will be applied through the Raw Data 
+correction process.
+5.2 High-Level Process Flow
+5.3 SOP Purpose
+The purpose of this document is to describe the standard procedure of processing Item inspection:
+ Item Inspection
+ Raw data correction (as result of Item Inspection)
+\n\n===== PAGE 50 =====\nConnect Data Science – Item Inspection (Draft)
+II SOP – 50
+5.4 SOP Process Flow Chart
+Process flow that describes the tasks to be performed and the “Roles” who are accountable for 
+completing the tasks.
+5.5 Detailed Steps
+See the detailed steps regarding the SOP:
+\n\n===== PAGE 51 =====\nConnect Data Science – Item Inspection (Draft)
+II SOP – 51
+ Step 1.03.42.01.01 – Item Inspection – Tools to use.
+ Two different tools are used for submitting Item Inspection:
+i. Job Scheduler: Used on regular schedule, most of the time this job is included in the 
+pre-production process. Operator need not process this separately or have any 
+reminders setup.
+       2. SIRVAL Web Interface: Used on an ad hoc basis for urgent requirements only
+ Step 1.03.42.01.02 – Item Inspection – Rules and Restrictions.
+ Rules and restrictions:
+i. Decision to run the process as part of the pre-production processes for a given week 
+is taken based on the following rules:
+ For all sample stores, it is a must to submit Item Inspection. Since the numbers from 
+Sample services represent the whole universe, the undetected outliers, if not 
+corrected, will be extrapolated in the final output.
+ The rule coming from MSCI is that for census shops the outliers should be left as they 
+are. Only obvious errors in the incoming retailer data are subject of corrections by 
+Item Inspection
+ Parameters must be reviewed on a regular basis, at least twice a year
+1. Item Inspection is a lengthy process. If the processing times are too long, a GO 
+QLS should be opened to discuss the most optimal filter setting.
+\n\n===== PAGE 52 =====\nConnect Data Science – Item Inspection (Draft)
+II SOP – 52
+2. Item Inspection should only run once on the same data set in correction mode 
+for a particular period. A rerun would generate a different distribution of sales/
+prices, and the risk exists to make unnecessary corrections.
+3. In any BAU situation, template jobs should be used in the Job Scheduler, 
+including automatic submission of the Raw data Correction
+ Step 1.03.42.01.03 – Item Inspection – Job Scheduler
+ Log in to the SIRVAL Web Interface using your credentials. Select the appropriate country 
+and period set.
+In BAU, this process must be submitted, including “Automatic Corrections.”
+To submit through the Job Scheduler:
+ Go to Job Scheduling a Job Library, here the operator can find all the template jobs 
+which are already created (In case a template job is not available, and the operator 
+needs to create it, then kindly refer to the ‘Functional document Job Scheduler’)a
+ The Item Inspection process is part of the “Pre Production Job“ for the respective 
+country channel
+ According to the operator’s requirement and the Job specification, the correct 
+template should be selected
+ At the time of submission, the operator needs to select the appropriate period from 
+the “Change period” option, Start time, End time, and Job class & priority
+ The submitted job can be monitored from Job Scheduling a Job Monitor
+Parameters for every process included in the Template Job have been set in advance. The 
+operator shouldn’t change these parameters. The order of the processes and the 
+parameters of a Template Job are fixed to avoid errors in BAU.
+The benefit of using Job Scheduler templates is that:
+i. Manual and repeated tasks can be automated.
+ii. Interdependent processes are clubbed together in one job.
+The process automatically stops in case there is an error in any of the clubbed processes, 
+and the subsequent process wouldn’t start.
+ Step 1.03.42.01.04 – Item Inspection – SIRVAL Web Interface
+ Log in to the SIRVAL Web Interface with your respective details. Select the appropriate 
+country and period set.
+•    Go to “Process submission” menu → ”Item Level Validation” → ”Item Inspection”
+•    The operator needs to select all the appropriate filters\n\n===== PAGE 53 =====\nConnect Data Science – Item Inspection (Draft)
+II SOP – 53
+•    The option to submit the processes of Raw data Corrections is present in the Item 
+Inspection interface.
+The operator must monitor the process and take appropriate actions in the event of an 
+abend – refer to Common Error & Resolutions.
+The benefit of using SIRVAL Web Interface is that – 
+1.    It allows executing one process at a time
+2.    It allows flexibility to change the filters as per the requirement and thus it's used for 
+processing ad hoc or urgent requests
+ Step 1.03.42.02.01 – Raw data Correction – Tools to use
+ Raw data Corrections can be submitted using the following tools:
+ Item Inspection Interface
+ Raw data Correction Interface
+ Step 1.03.42.02.02 – Raw data Correction – Item Inspection Interface
+ Log in to the SIRVAL Web Interface using your credentials. Select the appropriate country 
+and period set.
+ Option to submit the processes of Raw data Corrections is present in the same Item 
+Inspection interface, “Automatically Execute the corrections”. It executes Raw data 
+Correction automatically after the Item Inspection process ends
+The operator must monitor the process and take appropriate actions in the event of an 
+abend—refer to Common Error & Resolutions.
+The benefit of submission from the Item Inspection interface is that –
+ 
+The operator need not look after the raw data correction process as it submits the 
+corrections automatically
+ Step 1.03.42.02.03 – Raw data Correction – Raw data Correction Interface
+ This option should only be used in following scenarios:
+ New country setup
+ New channel setup
+ Any adhoc cases e.g. correction needs to be checked before submission.\n\n===== PAGE 54 =====\nConnect Data Science – Item Inspection (Draft)
+II SOP – 54
+Login to the SIRVAL Web Interface with respective details. Select the appropriate country 
+and period set.
+ Go to "Process submission" menu →  "Raw data correction"
+ The Raw data correction interface will be displayed with information related to the 
+suggested corrections as there are Ticket number, Process, Period, Description etc.…
+ The operator has to select the appropriate ticket (as available in Sysactivity log of 
+Item Inspection)
+Operator must monitor the process and take the appropriate actions in case of  abends – 
+Refer to Common Error & Resolutions
+Advantages of using Raw data Correction interface:
+i. The operator may check the corrections and decide if all of them need to be corrected 
+or leave the data as it is.
+ii. Used for ad hoc request.
+ Common errors/resolution.
+ In case there is an Abend in any of the processing steps, check the reason for the Abend in 
+the “Sysactivity Log”. All of them need to be solved before resubmitting the process.
+In addition to the Abend messages, the operator must take care as well of the Warning 
+messages present in the log of Item Inspection.
+These warnings, handling about stores ignored in Item Inspection, are mandatory to be 
+solved.
+Type of Errors –
+ Input File Error: Errors in any of the input files used.
+Resolution: Contact the applicant of the surgery to receive a corrected file.
+ Process Errors/Issues: Errors/Issues in the sequence of process submission.
+Resolution: Solve the process constraint as explained in the related common error file
+ System Errors/Issues: Errors/Issues caused by the system.
+Resolution: Raise a CCM ticket for Oracle errors.
+ Instruction/Parameter Errors: Errors that occur due to incorrect parameters or 
+instructions
+Resolution: Follow the instructions as explained in the following screen shoots (Taken from 
+the error file) 
+ \n\n===== PAGE 55 =====\nConnect Data Science – Item Inspection (Draft)
+II SOP – 55
+ 
+A GO QLS should be raised in case the root cause/solution of the issue is unclear. Only 
+when the root cause of the issue is clearly technical, a CCM  ticket should be opened.
+If the same type of issues occurs frequently, the operator should open a GO QLS as well 
+(even in case of a technical issue).

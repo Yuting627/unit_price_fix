@@ -1,0 +1,1333 @@
+\n===== SLIDE 1 =====\nWhy we need FOVA (Formal Validation) processes \nDEFINITION\nWhat the process does\nFOVA is first validation process in SIRVAL process flow.
+FOVA perform store level validation where the focus is on the general acceptance of the store rather than problems in a limited set of items.\nFor each store, current week’s data will be compared with Last Good period’s data (not salvaged / estimated / Xcopied)
+The comparison is done at different levels like Total sale, Units, Price, Cref (Barcode), Supergroup etc…
+Various statistical tests is run by the system during this comparison using pre-calculated acceptance range.+
+Detailed Report of comparison is generated as the output of the process.
+User can manually validate report for those stores which fail these statistical test/s and decide on whether to accept the data or not.
+If data of the store is received / loaded for the first time, system automatically considers it to be a DATA_GOOD store.\n\n===== SLIDE 2 =====\nFOVA Handling – Starters training\nLast update on  10-07-2023 
+By: Adarshkumar Gajjar
+
+Based on “FOVA Handling – Starters training”
+Created in Sept 2013 by: Dhara Patel, Greet Verryckt, Ferraro Roberto\nJuly 2023\n\n===== SLIDE 3 =====\n    Processes covered on this presentation - FOVA Parameters, FOVA Report, FOVA Validation & YAFA
+DEFINITION
+Process flow
+Why we need this process
+What the process does
+HOW THE PROCESS WORKS
+Process wise
+FOVA Validation Flow
+FOVA Report Tables
+FOVA Tags
+FOVA HANDLING
+YAFA
+Checks
+Rules & Restrictions
+Smart FOVA handling
+SETUP
+Parameters
+APPENDIX
+Useful links
+Small Store FOVA Validation
+Store format change identification
+
+\nTABLE OF CONTENT :\n\n===== SLIDE 4 =====\nSIRVAL Scanning Process Flow\nPCIMDB LOAD\nBulk Load & Bulk Update\nOpen Period\nBuffer Load\nRawdata Load\nFOVA\nIMDB Output Items\nFOVA Handling\nData Salvation\nQbrik\nRegular Price\n  Rawdata Corrections\nItem Inspection\nRexcoding\nIbenchmark\nCIG\nItem Activity\nBaseline\nNRSP Extraction\nModule Totals\nSurgery\nSample Load\nLDI_Preprocess\nFOVA parameters\nXcodes Last received Date\nPBD load from MADRAS\nAudit Store Usability\nParameter values & Filter management\nJob Class & Priority Monitor\nProcess in BAU          Production job           Processes which should run during the weekend            Connected Processes (Multicolor)\nStores & Batch management\nSuperstore Adjustment\nVariable Weight Price Validation\nShelfbenchmark\nShelfspace Treatment\nLast Activity\nRetailer Rawdata Extraction\n\n===== SLIDE 5 =====\nProcess wise \nHOW THE PROCESS WORKS\nFOVA as a process is bundle of 2 processes :
+FOVA Parameters
+FOVA Process
+Both these process serve different but crucial role in performing Store level validation.
+Purpose of FOVA Parameters :
+To create automatically robust parameter using latest 13 periods which reduces the FOVA NO OK to the real questionable. And these questionable stores needs to check manually.
+Purpose of FOVA process :
+To enable FOVA process for using new calculated parameters//ranges by FOVA _PARAMETER process and take the decision based on new boundaries.
+
+
+
+
+
+
+
+
+\n\n===== SLIDE 6 =====\nProcess wise - FOVA Parameters \nHOW THE PROCESS WORKS\n\n===== SLIDE 7 =====\nProcess wise - FOVA Parameters \nHOW THE PROCESS WORKS\n\n===== SLIDE 8 =====\nTABLE 🡪 FOVA_PARAMETER : 
+FOVA parameter is a pre-process and it is to be submitted before latest week’s FOVA load / immediately after production for the week on which production has just finished. 
+Process calculates all the boundaries for the periods on which process has submitted by Period/IBD/STATTAG 
+
+	\nHOW THE PROCESS WORKS\nProcess wise - FOVA Parameters \nIndicates the period on which process is submitted\n\n===== SLIDE 9 =====\n
+Two tables mentioned are refreshed after running X number of stores for the current period. 
+This calculation is refreshed once FOVA load count reaches to 2X,3X till defined parameter.
+
+FOVA_PARAMETER:  
+\nWhen the user can see the new line with current period by IBD (means new period for which FOVA  has submitted).
+
+Also the user can not see the LT & ST calculation when FOVA Parameter Process has not yet submitted for new period i.e.1929
+\nHOW THE PROCESS WORKS\nProcess wise - FOVA Parameters \n\n===== SLIDE 10 =====\nFOVA_PARAMETER_STATUS:\nHOW THE PROCESS WORKS\nProcess wise - FOVA Parameters \nThe user can see the new line by IBD with current period(means new period for which FOVA  has submitted)
+
+In this table, the operator can see different status in column NC_CT_STATUS
+	0🡪Store count is less than X (i.e. MIN_IBD_STORE_COUNT)
+	1🡪Store count reaches to X
+	2🡪 Stores are reaches to parameter MAX_IBD_STORE_COUNT\n\n===== SLIDE 11 =====\nTABLE 🡪 FOVA_PARAMETER_STATUS: 
+This table updated by FOVA parameter and FOVA process for current period
+			\nIndicates the periodicity where the process submitted\nIndicates the period for which process has submitted
+\nIndicates Previous period\nCount of the stores (FOVA OK) for current/previous period\nStatus indicates that for specific period fova_parameter is ready to use for next period\nHOW THE PROCESS WORKS\nProcess wise - FOVA Parameters \nFOVA IBD\nLower/Upper bound for the current period trend\n\n===== SLIDE 12 =====\nHOW THE PROCESS WORKS\nProcess wise - FOVA (Current Algorithm)\n\n===== SLIDE 13 =====\nHOW THE PROCESS WORKS\nFOVA Validation\n\n===== SLIDE 14 =====\nHOW THE PROCESS WORKS - FOVA Report Tables \nNew Fova Report Consist of 14 tables which are listed below :
+
+Table GENERAL NEW FOVA REPORT
+Table GLOBALFREQ
+Table TRENDVALUE
+Table DAILYDATA
+Table UNITFREQ
+Table CREFFREQ
+Table PRICEFREQ
+Table SUPERGROUPFREQ
+Table UCHANGEFREQ
+Table PRICECHANGEFREQ
+Table OUTLIERFREQ
+Table CREFTYPEFREQ
+Table XCODESTATUSFREQ
+Table PRICESYNCHFREQ
+
+Fova Tags are decided based on the outlier detected on each of these table as for each table there is unique statistical test ran by the algorithm.\n\n===== SLIDE 15 =====\nHOW THE PROCESS WORKS - FOVA Report Tables \nTable GENERAL NEW FOVA REPORT :
+
+This table contains Store related information.
+Period selected for Comparison and validation
+FOVA IBD in which store belong.
+Immediately below this table is the FOVA decision.
+
+Table GLOBALFREQ :
+
+This table is the comparison on Records, Units & Value of Current Period (CP) with Last Good Period (LGP) along with their percentage contribution to total for each of them.
+This Comparison is based on 3 buckets Common, Cancelled & New Items.
+
+Table TRENDVALUE :
+
+This table total of sales records, unit and value along with their FOVA decision for last 13 periods (parametric).
+
+Table DAILYDATA :
+
+This table total of sales records, unit and value day wise along with its percentage contribution.\n\n===== SLIDE 16 =====\nHOW THE PROCESS WORKS - FOVA Report Tables \nTable UNITFREQ :
+
+This table has buckets generated randomly on the basis of range of sales units.
+This table contains comparison on Records, Units & Value of Current Period (CP) with Last Good Period (LGP) along with their percentage contribution to total for each of them.
+
+Table CREFFREQ :
+
+This table has buckets generated randomly on the basis of range of crefs.
+This table contains comparison on Records, Units & Value of Current Period (CP) with Last Good Period (LGP) along with their percentage contribution to total for each of them.
+
+Table PRICEFREQ :
+
+This table has buckets generated randomly on the basis of range of sales price.
+This table contains comparison on Records, Units & Value of Current Period (CP) with Last Good Period (LGP) along with their percentage contribution to total for each of them.\n\n===== SLIDE 17 =====\nHOW THE PROCESS WORKS - FOVA Report Tables \nTable SUPERGROUPFREQ :
+
+This table has buckets generated on the basis of individual Supergroups.
+This table contains comparison on Records, Units & Value of Current Period (CP) with Last Good Period (LGP) along with their percentage contribution to total for each of them.
+
+Table UCHANGEFREQ :
+
+This table has buckets generated on the basis of change Frequency - Less, Equal & More of Sales Units.
+I.e. in comparison to LGP for how many unique records are less, same or more units sold is reported.
+This table contains comparison on Records, Units & Value of Current Period (CP) with Last Good Period (LGP) along with their percentage contribution to total for each of them.
+
+Table PRICECHANGEFREQ :
+
+This table has buckets generated on the basis of change Frequency - Less, Equal & More of Sales Price.
+I.e. in comparison to LGP for how many unique records price decrease, price increase & same price is reported.
+This table contains comparison on Records, Units & Value of Current Period (CP) with Last Good Period (LGP) along with their percentage contribution to total for each of them.\n\n===== SLIDE 18 =====\nHOW THE PROCESS WORKS - FOVA Report Tables \nTable OUTLIERFREQ :
+This table has buckets generated on the basis of - HIGH_CAN, LOW, INLINE, HIGH, HIGH_NEW
+This table contains comparison on Records, Units & Value of Current Period (CP) with Last Good Period (LGP) along with their percentage contribution to total for each of them.
+
+Table CREFTYPEFREQ :
+This table has buckets generated on the basis of Cref type reported.
+This table contains comparison on Records, Units & Value of Current Period (CP) with Last Good Period (LGP) along with their percentage contribution to total for each of them.
+
+Table XCODESTATUSFREQ :
+This table has buckets generated on the basis of Store xcodegroup level instructed in Store xcodegroup table.
+This table contains comparison on Records, Units & Value of Current Period (CP) with Last Good Period (LGP) along with their percentage contribution to total for each of them.
+
+Table PRICESYNCHFREQ :
+This table has buckets generated on the basis of P+U-/ P+U+/ P-U+/ P-U- / REST.
+This table contains comparison on Records, Units & Value of Current Period (CP) with Last Good Period (LGP) along with their percentage contribution to total for each of them.\n\n===== SLIDE 19 =====\nHOW THE PROCESS WORKS\nFOVA Tags\n\n===== SLIDE 20 =====\nHOW THE PROCESS WORKS\nFOVA Tags\nDATA_GOOD :
+
+Only those stores which are able to pass majority of statistical test and whose trend falls within the trend are suggested as DATA GOOD by the system.
+
+User is not supposed to check FOVA Report for DATA GOOD tagged stores as per SOP however as per country guidelines, if it is required to be checked user need to do so.
+
+DATA_GOOD - NO REASONS FOR ESTIMATION - PENDING RELAUNCH :
+
+This tag is assigned to those stores for which minimum number of stores loaded for respective FBD is yet to be achieved.
+
+For such cases, system performs limited statistical test on such stores and pass the judgement as Data Good with this tag if those tests are passed.
+
+However system keeps it noted to re-launch and run FOVA process again once Minimum store loaded count of the FBD is reached.
+
+
+
+\n\n===== SLIDE 21 =====\nHOW THE PROCESS WORKS\nFOVA Tags\nTRUNC-ESTIMATION PROPOSED :
+
+This tag indicates the possibility of some missing data in Current Period compared to LGP. Reasons for the missing items can be complete data (for all items) is not received
+
+In the FOVA report, if number of records in current period is significantly lower compared to LGP in Global freq. table 
+
+The operator can find some missing data in Supergroup freq. table for respective super groups.
+
+The operator can find very low data in number of records for respective cref frequencies in cref-freq. table in CP.
+
+An operator can identify problems in Unit freq., Price freq., Cref freq. and Supergroup. It may happen that Global freq. has minor changes.
+\n\n===== SLIDE 22 =====\nHOW THE PROCESS WORKS\nFOVA Tags\nIDENTICAL VOLUMETRICS-ESTIMATION PROPOSED :
+
+This tag means data of LGP and CP are exactly same.
+In the real world scenario this cannot be true that we have same volume, units and value as we had in previous week.
+This is possible only when data is copied over from last period.
+The operator needs to apply salvation or need to highlight to Onshore.
+An operator can identify problem from all the tables starting from Global freq.
+
+ 
+STRONG UPWARD TREND :
+
+This tag means shop has upward data compared to previous period. It may be due to festival or seasonality impact in prevailing country / region.
+Trend of all the shops across the retailer must be checked. If majority of the shops are having same trend, such store can be set as Ok. 
+If without any festival or season or any specific reason, such scenario persists then the operator needs to highlight to onshore / retailer and if required, apply salvation process on such stores.
+The operator can identify from Unit freq., Unit change freq., Price change freq., Supergroup tables.\n\n===== SLIDE 23 =====\nHOW THE PROCESS WORKS\nFOVA Tags\nNO RESET - ESTIMATION PROPOSED :
+
+When in data collection, dates are not reset correctly, No Reset tag is attached
+In such cases, the data received is much higher or almost double then LGP.
+The retailer may send the data for two weeks in one week itself. Since it is not expected, so if in 1 week turnover of the shop increases to double as compared to past weeks, it should be highlighted to onshore.
+An operator can identify problem in Unit freq., Supergroup tables
+An operator can observe double or more than double data in every Supergroup.\nSTRONG DOWNWARD TREND :
+
+This tag is set when the shop has downward data in current week as compared to previous week. There may be a chance of festival or seasonality impact in prevailing country / region.
+The operator should check trend of all the shops across the retailer. If major of the shops having same trend we can set such store as Ok. 
+If without any festival or season or any specific reason, such scenario persists than there is some problem. The operator needs to highlight to onshore and if required, apply salvation process on such stores.
+The operator can identify problem from Unit freq., Unit change freq., Price change freq., Supergroup tables
+\n\n===== SLIDE 24 =====\nHOW THE PROCESS WORKS\nFOVA Tags\nIDENTICAL PRICE :
+When most of the items are having the same price as of LGP’s price, then this tag will be affixed to FOVA report.
+This may be normal for the cases, where prices are not changed frequently (e.g. Pharmacy shop). For such cases the operator can accept the data. 
+When almost 90% items have same price in CP as in LGP.
+The operator can identify problem in Unit freq., Cref freq. and Price change freq. tables.\nCHANGED PRICE :
+
+When the price for most of the items are changed as compared to LGP’s price, then this tag will be affixed to FOVA report.
+The change in price can be very high or very low or when there are changes in price in CP for almost 80% to 90% items as compared to LGP. The price may be changed due to promotional offers by the retailer.
+The operator can highlight it to onshore when the price is changed for the stores without the promotional offers. For other specific reasons, salvation processes can be applied on such stores.
+An operator can identify problem at Price freq. and Price change freq. table.\n\n===== SLIDE 25 =====\nHOW THE PROCESS WORKS\nFOVA Tags\nPrice Sync :
+
+According to normal market conditions, when price increases, units sold should decrease and when the price decreases, units sold should increase.
+FOVA reports will fall under this tag, when the price and units are not in synchronization as per the normal market conditions, i.e., when increase in price results in increase in units sold and when decrease in price results in decrease in units sold.
+Apart from Price Sync table, the operator needs to refer other tables as well to take the FOVA decision.
+An operator can see problem in Unit freq., Price freq., Unit change freq. and Price sync freq. table.\n\n===== SLIDE 26 =====\nHOW THE PROCESS WORKS\nFOVA Tags\nExceptional Positive OR Negative Trend :
+
+This tag is set when the trend variant (calculated using previous and current period information) is violated the boundaries of trend lower/upper bound.
+An acceptable range will be parameter driven which is calculated automatically by FOVA process using current and back 13 weeks.
+If value do trend Variant is lower than Lower Bound (LB) then test will be tagged as “EXCEPTIONAL NEGATIVE TREND BEHAVIOUR” and If current period is higher than Upper Bound (UB) then it will be tagged as “ EXCEPTIONAL POSITIVE TREND BEHAVIOUR”.
+Decision can be made as per the rules mentioned in the SOP.\nMissing Days :
+
+This tag will be applicable for the store where daily sales information is received in the input (i.e. SIRPAIR files).
+For such cases in FOVA report, Daily data table will be generated which will show day wise information.
+If any expected day is missing, then store will be flagged as “MISSING DAYS”. Expected days need to be setup in the parameter values.
+Decision can be made as per the rules mentioned in the SOP.\n\n===== SLIDE 27 =====\nHOW THE PROCESS WORKS\nFOVA Tags\nUNIDENTIFIED - NO LGW AVAILABLE :
+
+This tag is set when 
+1. Fova stats is not available for compute WT boundaries & store status is good in previous period 
+(e.g. First Fova Run, No common item found)
+2. Internal fova decision is “Unidentified Estimation”
+When all statistical test is failed to decide the issue so system will through with this tag for manual intervention\nHIGH DEVIANCE :
+
+This tag is set when there is mix trend behavior of data.
+There are items which shows decreasing and increasing sale.
+No common pattern is found for this tag. Mix trend can be seen in records/units or values.
+The operator can find *** in Global frequency table, Price frequency table, Supergroups, Unit frequency table.
+The operator has to follow the country guideline to accept or salvaged the data.\n\n===== SLIDE 28 =====\nHOW THE PROCESS WORKS\nFOVA Tags\n\n===== SLIDE 29 =====\nHOW THE PROCESS WORKS\nFOVA Tags\nExceptional Positive OR Negative Trend/Structure/Supergroup Issues :
+
+This tag is set when the trend variant for any Supergroups/Structural consistency of CREF group frequency table/ CREF type frequency table  is violated the boundaries of trend lower/upper bound.
+An acceptable range for each over all trend/Supergroups/Structural consistency of CREF group frequency table/ CREF type frequency table will be parameter driven which is calculated automatically by FOVA process using current and back 13 weeks.
+If value for trend Variant is lower than Lower Bound (LB) then test will be tagged as “EXCEPTIONAL NEGATIVE” and If current period is higher than Upper Bound (UB) then it will be tagged as “ EXCEPTIONAL POSITIVE”.
+Decision can be made as per the rules mentioned in the SOP.
+\nSTORE STRUCTURAL DEFICIENCIES :
+
+This tag is set when ever any Supergroups are missing data or having trend inconsistency. This tag is also assigned if Structural consistency of CREF group frequency table/ CREF type frequency table has violated the boundaries of trend lower/upper bound.\n\n===== SLIDE 30 =====\nHOW THE PROCESS WORKS\nFOVA Tags\n\n===== SLIDE 31 =====\nHOW THE PROCESS WORKS\nFOVA Tags\nNEW_FOVA :
+This tag is assigned to those stores which are validated by system NEW FOVA Algorithm.
+\nTREND TEST NOT OK - ESTIMATION PROPOSED :
+This tag is assigned to those store which has failed Trend Test performed by the process. 
+\nOLD_FOVA :
+
+This tag is assigned to store which are validated by system using OLD FOVA Algorithm. 
+There are 2 possibilities for it:1. Minimum count of Stores for fulfilling FBD requirement is not met.
+2. That store/retailer are excluded from new FOVA process.
+\n\n===== SLIDE 32 =====\nDM 24442 - FOVA Price Change Enhancement:\nPreviously, the FOVA price check algorithm splits the price change compared to previous ‘good’ period into 3 brackets (‘less’, ‘equal’ and ‘more’) for detecting price issues. This validation works well in most cases. However, when an anomaly like sending price=1 for many or some of items in one or couple of days, can be ‘missed’ due to the fact that ‘less’ and ‘more’ do not measure the magnitude of change. 
+
+A new algorithm is added in FOVA to detect price issues mentioned above. This new algorithm will enhance/replace the current ‘Changed Price’ fova tag detection. 
+
+A new step is added in FOVA PARAMETER process to calculate the % of items for which the price has significantly changed for each week. This information will later be used by FOVA, to identify whether the current period data will be considered as price outlier or not. 
+
+The new logic in FOVA PARAMETER process will be driven by the below new process parameters:  
+
+PRICE_CHECK_ENABLE - Y/N - Whether to activate the calculation of price check parameters 
+PRICE_CHECK_CALCULATE_WEEKS - Number of historical weeks to consider for price check parameter calculation 
+PRICE_CHECK_CHANGE_LIMIT – The limit of absolute % price change vs preceding period, above which the price will be flagged as outlie
+
+\nDec’22 CR\n\n===== SLIDE 33 =====\nDM 24442 - FOVA Price Change Enhancement:\nThe new process will require historical data to be used, and the number of weeks considered will be defined based on parameter PRICE_CHECK_CALCULATE_WEEKS.  
+
+
+If the parameter PRICE_CHECK_ENABLE is activated, then FOVA PARAMETER will iterate over the periods in scope and will calculate for each shop: 
+
+Number of items.
+The number of items for which their price has changed more than X % based on previous period. X% will be based on the value of the parameter PRICE_CHECK_CHANGE_LIMIT.
+
+Only common items (I.e., found on both period T and T-1) will be considered. 
+The results will be stored in a new table named FOVA_PRICE_CHECK_LIMITS so they can be later used by FOVA process.  
+
+\nDec’22 CR\n\n===== SLIDE 34 =====\nDM 24442 - FOVA Price Change Enhancement:\nThe FOVA process will also be enhanced to improve the price check logic.  
+The new logic in FOVA process will be driven by the below new process parameters:  
+PRICE_CHECK_ENABLE - Y/N - Whether t to activate the calculation of price check parameters 
+PRICE_CHECK_BACK_WEEKS - Number - default 12 - Number of historical weeks to consider for price change limit calculation 
+PRICE_CHECK_MIN_BACK_WEEKS – Number default 4 – Minimum number of historical weeks needed to use the price check algorithm 
+PRICE_CHECK_CHANGE_LIMIT  - The limit of absolute % price change vs preceding period, above which the price will be flagged as outlier 
+
+If the PRICE_CHECK_ENABLE parameter is activated, then the process will perform the below validations: 
+
+The value of the parameter PRICE_CHECK_BACK_WEEKS must be >= PRICE_CHECK_MIN_BACK_WEEKS. If not, then write a message in the log and the new price check logic will be disabled 
+\nDec’22 CR\n\n===== SLIDE 35 =====\nDM 24442 - FOVA Price Change Enhancement:\nAfter the existing price check logic is performed in FOVA, and if the PRICE_CHECK_ENABLE parameter is activated then a new procedure will be executed that will perform the below steps:  
+Calculate for current period the percentage of items with price change over limit vs previous periods. 
+Calculate from table FOVA_PRICE_CHECK_LIMITS based on historical weeks the price change limit to use for outlier check 
+Flag the shop as price outlier based on above 
+If eventually FOVA completes with a decision of FOVA OK (monitor tag 300) considering that the shop was flagged as price outlier with the new logic, then: 
+The monitor tag will be overwritten to 361 
+The monitor status will be modified to 1
+\nDec’22 CR\n\n===== SLIDE 36 =====\nDM 24442 - FOVA Price Change Enhancement:\nStep by Step description:
+
+In order to flag a shop as an outlier, a table calculated in period t-1 (see below table) is required
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                               Table –1 
+
+Below steps has to be followed in order to obtain the above-mentioned Table 1.
+
+
+
+\nDec’22 CR\n\n===== SLIDE 37 =====\nDM 24442 - FOVA Price Change Enhancement:\nInput data preparation:
+
+STEP 1:
+
+Create a price table for all shops/item and last 13 periods (see below table 2):
+
+
+
+
+
+
+
+
+
+                                   Table –2
+
+Note: ‘Item 3’ was not sold in t-10 and t-8.
+
+
+\nDec’22 CR\n\n===== SLIDE 38 =====\nDM 24442 - FOVA Price Change Enhancement:\nInput data preparation:
+
+STEP 2:
+
+Calculate absolute % price change between 2 consecutive periods (see below table 3). For example the figure found for Store=S001, Product=item1 and Period=t-12 is calculated by: abs((pricet-12 / pricet-13) – 1)
+
+
+
+
+
+
+
+
+
+
+                                                            Table –3
+
+Note: The calculations and further estimations will be based on the common items between 2 consecutive periods
+\nDec’22 CR\n\n===== SLIDE 39 =====\nDM 24442 - FOVA Price Change Enhancement:\nInput data preparation:
+
+STEP 3:
+Select a parameter that will be compared with absolute % price change in order to ‘flag’ the big price changes. Default Param = 15%.
+
+STEP 4:
+Compare the selected parameter with the calculated in Table 3 price % changes. The expected resulting values are -1, 0 and 1, following the below logic:
+If the absolute % price change <= Param, then 0.
+If the absolute % price change > Param, then 1.
+If the absolute % price change is ‘na’, then -1.
+
+Using the above-mentioned logic, Param=15% and the figures from Table 3, the figures in Table 4 are calculated:
+
+
+
+
+
+
+
+
+
+                                                                     Table 4
+
+\nDec’22 CR\n\n===== SLIDE 40 =====\nDM 24442 - FOVA Price Change Enhancement:\nInput data preparation:
+
+STEP 5:
+Count all ‘1’ in particular period (e.g., count the cases where the price % change is bigger than the selected parameter
+Count the number of common items between the 2 consecutive periods
+
+
+
+
+
+                                                              Table 5
+STEP 6:
+
+Calculate the % of cases from total common products where the price % change is bigger than the Parameter.
+
+
+
+
+
+
+                                                                     Table 6
+
+\nDec’22 CR\n\n===== SLIDE 41 =====\nDM 24442 - FOVA Price Change Enhancement:\nInput data preparation:
+
+STEP 7:
+
+Using the figures in Table 6 calculate the price change limit for the particular shop for period t, (i.e., the figures in Table 1), by using the below formula:
+
+Shop Price change limit period t = Avg(t-12:t-1) + 3*std(t-12:t-1)
+Using our data, we calculate ‘Shop Price change limit period t’ to be 0.8.
+
+STEP 8:
+
+When in period t one can validate if the % price change is bigger (i.e., outlier) or lower (i.e., not outlier) compared to the ‘Shop Price change limit period t’.
+
+\nDec’22 CR\n\n===== SLIDE 42 =====\nDM 24442 - FOVA Price Change Enhancement:\nInput data preparation:
+
+STEP 9:
+
+Create a summary table (see Table 7 below) by FBD/chain with the percent of outliers out of the total number of stores in the specific FBD/chain and if the percent is lower than an user inputted threshold (default 3%) mark the chain status as “OK” (i.e. the chain does not have an issue overall with prices and 'ignore' the stores' price flag), else mark the ‘Chain Status’ as ‘Q’ (questionable).  
+
+Note: Chain wise price outlier information can be get using the e-forte report. (Report id: 1001494)
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                 Table 7
+
+\nDec’22 CR\n\n===== SLIDE 43 =====\nDM 24442 - FOVA Price Change Enhancement:\nParameters:
+
+The following parameters is introduced in the system. 
+
+
+
+
+
+
+Parameters details: 
+  
+PRICE_CHECK_ENABLE: 
+      
+Description: Whether to activate the calculation of price check parameters 
+Default value = Y 
+Valid values are: Y/N   
+Specificity: STORE 
+  
+PRICE_CHECK_CALCULATE_WEEKS: 
+    
+Description: The number of historical weeks to consider for price check parameter calculation 
+Default value = 1
+Valid values are: Integer >0  
+Specificity: STORE 
+
+
+\nDec’22 CR\n--- TABLE ---\nProcess ID | Parameter Name | Description\nFOVA_PARAMETER | PRICE_CHECK_ENABLE | whether to activate the calculation of price check parameters\nFOVA_PARAMETER | PRICE_CHECK_CALCULATE_WEEKS | the number of historical weeks to consider for price check parameter calculation\n\n===== SLIDE 44 =====\nDM 24442 - FOVA Price Change Enhancement:\n
+
+
+
+
+
+
+Parameters details 
+
+PRICE_CHECK_ENABLE:
+     
+Description: Whether to activate the calculation of price check parameters 
+Default value = Y 
+Valid values are: Y/N   
+Specificity: STORE 
+ 
+PRICE_CHECK_BACK_WEEKS:
+  
+Description: The number of historical weeks to consider for price change limit calculation 
+Default value = 12 
+Valid values are: Integer >0  
+Specificity: STORE 
+\nDec’22 CR\n--- TABLE ---\nProcess ID | Parameter Name | Description\nFOVA | PRICE_CHECK_ENABLE | Whether to activate the calculation of price check parameters\nFOVA | PRICE_CHECK_BACK_WEEKS | The number of historical weeks to consider for price change limit calculation\nFOVA | PRICE_CHECK_MIN_BACK_WEEKS | The minimum number of historical weeks needed to use the price check algorithm\nFOVA | PRICE_CHECK_CHANGE_LIMIT | The limit of absolute % price change vs preceding period, above which the price will be flagged as outlier\n\n===== SLIDE 45 =====\nDM 24442 - FOVA Price Change Enhancement:\nPRICE_CHECK_MIN_BACK_WEEKS::
+     
+Description: The number of historical weeks to consider for price change limit calculation 
+Default value = 4
+Valid values are:Integer >0   
+Specificity: STORE 
+ 
+PRICE_CHECK_CHANGE_LIMIT:
+  
+Description: The limit of absolute % price change vs preceding period, above which the price will be flagged as outlier    
+Default value = 0.15
+Valid values are: number < 0  
+Specificity: STORE 
+\nDec’22 CR\n\n===== SLIDE 46 =====\nDM 24442 - FOVA Price Change Enhancement:\nTable:
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                              Table name                :     FOVA_PRICE_CHECK_LIMITS  
+                                                               Type of table              :     Permanent table  
+                                                               Schema                      :     VLDPROCESS_XX  
+                                                               Access Mode              :    Read/Write  
+                                                               Synonyms                   :    VLDSYS_XX. FOVA_PRICE_CHECK_LIMITS  
+                                                               Primary key                 :    NC_PERIODID AC_NSHOPID 
+
+Tags: 
+  
+Added a new MONITORTAG in table MONITORTAGS:  
+AC_MONITORTAG = '361' 
+AC_MONITORTAGDESCRIPTION = ‘Price outlier ' 
+AC_COMMENT = 'Store was marked as outlier' 
+\nDec’22 CR\n--- TABLE ---\nField | Type | Comment\nNC_PERIODID | NUMBER | \nAC_NSHOPID |  | \nNC_NB_ITEMS | INTEGER | \nNC_NB_ITEMS_PRICE_CHANGE_OVER_LIMIT | INTEGER | \nNC_PCT_ITEMS_PRICE_CHANGE_OVER_LIMIT | NUMEBR | NC_PCT_ITEMS_PRICE_CHANGE_OVER_LIMIT as round(NC_NB_ITEMS_PRICE_CHANGE_OVER_LIMIT / NC_NB_ITEMS, 2)\n\n===== SLIDE 47 =====\nDM 24442 - FOVA Price Change Enhancement:\ne-Forte Report:  
+  
+There is a new e-Forte report is introduced which will provide the information that retailer/chain is price outlier or not using cut off mentioned in the report extraction. 
+  
+Title of e-forte report: FOVA price outliers chain status 
+Report id: 1001494
+Parameters: 
+Country 
+Period 
+Threshold (default 3%) 
+
+\nDec’22 CR\n\n===== SLIDE 48 =====\nDM 24442 - FOVA Price Change Enhancement:\ne-Forte Report:  
+  
+Output of the report: 
+
+\nDec’22 CR\nHere,  
+FBD = AC_IBD & Chain = Store chain 
+Total Stores = Fova count 
+PRICE_OUTLIERS = Outlier stores count. 
+PCT_OUTLIERS = PRICE_OUTLIERS / TOTAL_STORES.
+Chain Status = When PRICE_OUTLIERS / TOTAL_STORES > “threshold” then Q else OK.
+\n\n===== SLIDE 49 =====\nDM 25211 FOVA Missing Days Enhancement: \nCurrently the FOVA process is using a simple logic to identify missing days in Daily Data: 
+
+Checking if Daily Data is Available for the store
+If Daily Data are available, then a day is marked as missing if:
+it has 0 sales 
+and it was expected to receive data for that day (based on EXPECTED_DAYS parameter)
+
+Defining the EXPECTED_DAYS parameter is not user friendly. In addition, the existing logic doesn’t consider any historical daily data as part of the decision making. Furthermore, in case we have missing daily data, then there is no system suggestion on how the data can be modified to arrive to valid situation. 
+
+A new algorithm is added in FOVA process to enhance the daily data validation logic with a new algorithm. This algorithm is based on the store holiday calendar already available in SIRVAL, as well as historical daily data for the store. Based on these inputs, it identifies for which days we have missing daily data and suggest a factor that can be applied on the raw data to make the shop valid. 
+  
+A new logic is added in FOVA to enhance the current logic with a new algorithm if historical data is available for the store. 
+
+\nDec’22 CR\n\n===== SLIDE 50 =====\nDM 25211 FOVA Missing Days Enhancement: \nThe new logic is driven by the below new process parameters: 
+DAILY_DATA_FACTOR_SUGGESTION - Y/N - Whether to run the new algorithm to identify missing days in daily data and calculate an expansion factor
+DAILY_DATA_FACTOR_HISTORY_WEEKS - Number - default 52 - Number of historical weeks to consider for daily data validation
+DAILY_DATA_FACTOR_MIN_AVAILABLE_WEEKS – Number default 4 – Minimum number of historical weeks with correct daily data for the new logic to run (Data good)
+
+The new process will require historical data to be used, and the number of weeks considered will be defined based on parameter DAILY_DATA_FACTOR_HISTORY_WEEKS. A validation will be added in the beginning of the FOVA process so that: 
+
+If parameter DAILY_DATA = Y and
+If parameter DAILY_DATA_FACTOR_SUGGESTION = Y and
+If we have in table DAILYDATA_INFO for the specific shop less than DAILY_DATA_FACTOR_MIN_AVAILABLE_WEEKS periods in the last DAILY_DATA_FACTOR_HISTORY_WEEKS periods (only periods for which the store was validated as OK will be considered when reading DAILYDATA_INFO) then a log message will be written and FOVA will continue with the old way of validating the daily data (I.e., as if DAILY_DATA_FACTOR_SUGGESTION = N).
+  \nDec’22 CR\n\n===== SLIDE 51 =====\nDM 25211 FOVA Missing Days Enhancement: \nIf we do have appropriate historical daily data available, then the system will proceed to perform the steps below based on new logic: 
+  
+Calculate the probability for the store to have sales on each day of the week using the historical daily data
+Calculate the number of expected days for the week by summing up the probabilities of each day
+Calculate the importance / share of each day in the week, based on the historical data
+If number of expected days is equal to days received, then continue with the FOVA
+If the number of days received is NOT equal to expected days, calculate the number of missing days
+Based on number of missing days, iterate over the days for which we have not received data based on probability descending and perform the below actions:
+Check against Holiday calendar (PUBLIC_HOLIDAYS table) if the missing day was holiday/special event. If the day is on calendar special/event, then consider that this day is not really missing 
+If the missing day is not on holiday/special event, then flag the day as really missing
+
+If eventually we have any days missing that cannot be justified based on holiday calendar, then a factor is calculated that should be applied in the raw data to expand it. The factor will be calculated based on the importance / share of the days identified as missing from the logic above.
+
+Example:\nDec’22 CR\nHere, factor is calculated as below: 
+Factor = 1+ (1- total shares of received data)/ total shares of received data 
+            = 1+(1-0.728/0.728)             = 1.374\n\n===== SLIDE 52 =====\nDM 25211 FOVA Missing Days Enhancement: \nAs part of the above logic/mentioned steps, in case we have any days with missing daily data, and a factor has been calculated, then in all subsequent steps that FOVA is reading raw data, the SLOT1 and SLOT2 columns will be multiplied with this factor. This will allow the FOVA process to continue assuming that the daily data received did not have any gaps. 
+  
+If eventually FOVA completes with a decision of FOVA OK (monitor tag 300) considering that a daily data factor had been applied, then: 
+The monitor tag will be overwritten to 358
+The monitor status will be modified to include the value of the factor
+  
+This will allow the user to apply a correction to the store data to apply the factor and thus to arrive in a valid store situation for the period. \nDec’22 CR\n\n===== SLIDE 53 =====\nDM 25211 FOVA Missing Days Enhancement: \nBasic Process flow:\nDec’22 CR\n\n===== SLIDE 54 =====\nDM 26031 - FOVA Missing days Enhancement phase 2:\nFor Existing Fova missing days calculation on Daily data algorithm some adjustments are required.
+
+In the existing process, part of FOVA, that identifies and flags Missing days on daily data there is a need to enhance the process so that under specific scenarios some additional days are flagged. The current process is flagging Missing Days in case # of days received is less than expected days.
+
+Based on the new requirements if the probability value of a specific day is greater than a threshold (default 0.9) and no data has been received for the day, in case it is not defined as a holiday, it should then be flagged as a missing day even if the expected days criteria is met.
+
+Below 2 criteria is considered for it:
+
+Scenario 1: 
+
+In case Days Received are more or equal to the expected days, but there are days with Probability > 0.9 not received and it is not a Holiday, then it should be considered and flagged as a missing day. 
+
+Scenario 2:
+In case Days Received are less than the expected days, but there are days with Probability > 0.9 not received and it is not a Holiday, then it should be considered and flagged as a missing day. 
+
+\nJul’23 CR\n\n===== SLIDE 55 =====\nDM 26031 - FOVA Missing days Enhancement phase 2:\nNew flow to flag the day as missing day is as follow:
+\nJul’23 CR\n\n===== SLIDE 56 =====\nDM 25211 FOVA Missing Days Enhancement: \nExamples of missing days detection: 
+  
+These examples are presented for a calendar week Mon –Sun, but any span of 7 days could be validated in the same way. 
+  
+Example 1: 
+Expected number of days for the store sum(weekday_proba) =5.18 => 5 (number should be truncated) 
+Received number of days: 4 
+Validation with holiday calendar => nok 
+Result: missing day with the biggest probability: Tuesday should be flagged \nDec’22 CR\n\n===== SLIDE 57 =====\nDM 25211 FOVA Missing Days Enhancement: \n
+Example 2: 
+Expected number of days for the store sum(weekday_proba) =5.18 => 5 
+Received number of days: 4 
+Validation with holiday calendar => ok 
+Result: no flag 
+
+\nDec’22 CR\n
+Example 3: 
+Expected number of days for the store sum(weekday_proba) =5.18 => 5 
+Received number of days: 4 
+Validation with holiday calendar => sales received on bank holiday, but still one day missing 
+Result: Fri flagged as missing \nIf there is a choice between two days with equal probabilities and one of those days must be flagged as missing a random choice has to be used to select the day to flag.\n\n===== SLIDE 58 =====\nDM 25211 FOVA Missing Days Enhancement: \nDec’22 CR\nParameters: 
+  
+The following parameters should be introduced in the system.
+
+
+
+
+
+
+
+
+
+Parameters details:
+
+DAILY_DATA_FACTOR_SUGGESTION:
+  
+Description: Whether to run the algorithm to identify missing days in daily data and calculate an expansion factor
+Default value = Y
+Valid values are: Y/N  
+Specificity: STORE
+Maintenance Role: OPERATOR
+
+
+\n--- TABLE ---\nProcess ID | Parameter Name | Description\nFOVA | DAILY_DATA_FACTOR_SUGGESTION | Whether to run the algorithm to identify missing days in daily data and calculate an expansion factor\nFOVA | DAILY_DATA_FACTOR_HISTORY_WEEKS | Number of historical weeks to review\nFOVA | DAILY_DATA_FACTOR_MIN_AVAILABLE_WEEKS | Minimum number of historical weeks with correct daily data in order for the new logic to run\n\n===== SLIDE 59 =====\nDM 25211 FOVA Missing Days Enhancement: \nDec’22 CR\nDAILY_DATA_FACTOR_HISTORY_WEEKS:  
+  
+Description: Number of historical weeks to review
+Default value = 52
+Valid values are: NUMBER >3  
+Specificity: STORE
+Maintenance Role: OPERATOR
+
+
+DAILY_DATA_FACTOR_MIN_AVAILABLE_WEEKS   
+
+Description: Minimum number of historical weeks with correct daily data in order for the new logic to run
+Default value = 4
+Valid values are: NUMBER >=4  
+Specificity: STORE
+Maintenance Role: OPERATOR
+
+
+
+
+\n\n===== SLIDE 60 =====\nNEW STATUS “EXPECTED”\n
+There is a new store status introduced that is “EXPECTED” which is useful for the E-COM stores specifically.
+Earlier we have only Optional & Required status for stores but with this, there is a chance that Rawdata completeness process will pick the stores and salvage them. 
+For E-COM store, we put the store status as “EXPECTED”. 
+Reason behind this status is, we do not salvage E-COM stores, Hence E-COM store will not be picked by Rawdata completeness process and will not salvage.\n\n===== SLIDE 61 =====\nFOVA HANDLING - YAFA\nStores which do not pass the Statistical tests are considered as Questionable stores by the system and are thrown in YAFA (Yet Another Formal Validation application).
+
+There are 3 options available in YAFA
+
+Enhanced Loading Stats : (Aug’20 CR)
+
+Enhanced Loading Stats
+Retailer Info
+Reception Details
+FOVA Graphs
+
+Loading Status :
+
+Loading Stats
+General Overview
+Retailer Info
+FOVA to do Browser
+
+Other Options :
+
+FOVA Report browser
+FOVA Statistic browser
+\n\n===== SLIDE 62 =====\nYAFA - Enhanced Loading Stats\nThis tab under YAFA is used for ECOM stores(Mostly).\n\n===== SLIDE 63 =====\nYAFA - Enhanced Loading Stats\nBelow condition used for the color coding in loading stats :
+If MAX_LOADED_STORE_PERC < 95% => Warning (Orange)
+If MAX_LOADED_STORE_PERC >= 95% and MAX_STORE_NOTOK_PERC  > 3% => Critical (Red)
+If MAX_LOADED_STORE_PERC >= 95% and MAX_STORE_NOTOK_PERC  <= 3% => OK (Green)
+
+There is one more column “Status” added which will provide the status of the retailer as per above criteria.
+\n\n===== SLIDE 64 =====\nYAFA - Retailer Info\nThis tab under YAFA is used for ECOM stores(Mostly).\n\n===== SLIDE 65 =====\nYAFA - Reception Details\nThis tab under YAFA is used for ECOM stores(Mostly). When click on reception details it open below screen.\n\n===== SLIDE 66 =====\nYAFA - Reception Details\nThis tab under YAFA is used for ECOM stores(Mostly). It will populate below screen when select Level 1.\n\n===== SLIDE 67 =====\nYAFA - Reception Details\nThis tab under YAFA is used for ECOM stores(Mostly). It will populate below screen when select Level 2.
+\n\n===== SLIDE 68 =====\nYAFA - Reception Details\nThis tab under YAFA is used for ECOM stores(Mostly). It will populate below screen when select Level 1 & Level 2.
+\n\n===== SLIDE 69 =====\nYAFA - Reception Details\nThis screen data is populated for Stat ops team to do analysis at their end. So data populated by this screen (Reception details) should be shared to the stat ops team as per their requirement.
+
+Country can decide which filter to be used in Level 1 and Level 2 so that it can be more useful for stat ops team analysis.
+
+As per the requirement IV user need to extract the data and in case if required user can extract data at store level (by clicking on “Store Level” tab) and share it to stat ops team.\n\n===== SLIDE 70 =====\nYAFA - FOVA Graphs\nThis tab under YAFA is used for ECOM stores(Mostly).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\n\n===== SLIDE 71 =====\nYAFA - FOVA Graphs (Cont..)\nTwo sets of graphics are shown:
+
+A. Trend (Increment or decrement over the previous period)
+B. Contribution (percentage on the total of the period)
+
+In all the graphics the ‘X’ axis represents a percentage while the ‘Y’ axis contains the periods.
+
+Trend case Records loaded two lines will be shown :
+a. Percentage of the records loaded in the store calculated as a ratio on the previous period 
+b. Percentage calculated on the average of the records loaded (ratio on previous period) in the stores received (STORES OK) calculated on the user defined base (Retailer or Level 1 or Level 2)
+
+Sales Units
+
+c. Percentage of the Total sales Units loaded in the store calculated as a ratio on the previous period d. Percentage calculated on the average of the Total sales Units loaded(ratio on previous period) in the stores received(STORES OK) calculated on the user defined base (Retailer or Level 1 or Level 2)
+
+Sales Value
+
+e. Percentage of the Total sales Value loaded in the store calculated as a ratio on the previous period f. Percentage calculated on the average of the Total Value Units loaded(ratio on previous period) in the stores received(STORES OK) calculated on the user defined base (Retailer or Level 1 or Level 2)
+
+Trend / contribution 
+
+Two lines will be displayed here:
+One in blue is the representation of the selected store trend
+The second is the trend of the average of the stores within the group.
+
+(Note : Input tables used to select data for that screen are: STORES & STORESTATS & STOREMONITOR (to filter stores by FOVA status))
+
+Parameter setup for YAFA is here.
+\n\n===== SLIDE 72 =====\nYAFA General Overview\nGeneral Overview : 
+
+This gives an overview of various FOVA Tag as compared to last 10 periods. 
+This is used as a retailer / channel / country level check. 
+Based on the comparison if the operator observe any issue it should be raised immediately to Onshore / Retailer.
+If there is issue with overall retailer, we can raise it immediately to onshore / retailer and get the correct data on time. \n\n===== SLIDE 73 =====\nYAFA General Overview\nIn FOVA Overview, it can be observed that number of stores thrown in UNIDENTIFED –ESTIMATION PROPOSED FOVA tag for the current week is very high when compared to other past weeks
+In such cases, the operator needs to investigate further why more number of stores are thrown in YAFA by reviewing FOVA supporting files, Holiday Lists, Seasonality etc.
+If the operator couldn’t find anything related to this retailer, then highlight it to onshore and act according to the onshore’ s feedback\n\n===== SLIDE 74 =====\nYAFA Retailer Info\nPURPOSE: 
+It is an initial check to identify variation at the total retailer level & highlight to relevant department to avoid any quality issue
+HOW TO DO:
+Initially we only check +/-10% variation at the total retailer level to identify variation & highlight to relevant department to avoid any quality issue
+Now below 4 points will be considered to identify the issue & highlight to onshore for further analysis 
+Atypical sales for retailer and its behavior is different from other similar kind of retailers
+Having some problem in FOVA OVERVIEW
+No additional information is available to justify the variation
+Retailer trend is more than +/-10%\n\n===== SLIDE 75 =====\nExample of Retailer level check
+
+The operator needs to check Retailer level trend by comparing current period data to the data from past periods. If for a retailer, the current period retailer data is within -/+10% to previous period data, data can be accepted
+
+For the retailer Majestic Wine GB081, it can be observed that Total Units & Total Values are high when compared to previous period
+
+In this case, the operator needs to check FOVA OVERVIEW from YAFA browser for the retailer behavior for the current week\n--- TABLE ---\nPERIODID | RETAILER | CHANNEL ID | SHOP LOADED | ITEMS | QUANTITY | VALUE | ITEMS PER | QUANTITY PER | VALUE PER\n1807 | GB081 | MOFF | 217 | 77220 | 848149 | 5093769 |  |  | \n1808 | GB081 | MOFF | 218 | 76957 | 916818 | 5489594 | -.34% | 8.1% | 7.77%\n1809 | GB081 | MOFF | 217 | 77278 | 779643 | 5128995 | .42% | -14.96% | -6.57%\n1810 | GB081 | MOFF | 216 | 73622 | 759225 | 4898439 | -4.73% | -2.62% | -4.5%\n1811 | GB081 | MOFF | 218 | 75287 | 751965 | 4978318 | 2.26% | -.96% | 1.63%\n1812 | GB081 | MOFF | 216 | 76872 | 770705 | 5322690 | 2.11% | 2.49% | 6.92%\n1813 | GB081 | MOFF | 217 | 78200 | 799883 | 5222177 | 1.73% | 3.79% | -1.89%\n1814 | GB081 | MOFF | 217 | 76688 | 747943 | 4974322 | -1.93% | -6.49% | -4.75%\n1815 | GB081 | MOFF | 216 | 77362 | 713438 | 4953099 | .88% | -4.61% | -.43%\n1816 | GB081 | MOFF | 217 | 78689 | 750716 | 4936536 | 1.72% | 5.23% | -.33%\n1817 | GB081 | MOFF | 217 | 85045 | 922887 | 6335723 | 8.08% | 22.93% | 28.34%\nYAFA Retailer Info\n\n===== SLIDE 76 =====\nDM 25982 - Retailer Info to populate for Daily Data retailer:
+
+Apart from the normal weekly retailer, system can also provide the retailer information for the Daily data periodicity retailer as well. This retailers are aggregated from the DD periodicity to WKLY periodicity. To populate this data, it will use below tags:
+
+Process ID: DAILYDATA_MANAGEMENT 
+AC_STATTAG:  
+NREC_AGGREGATED --> As Items. 
+SUM_SLOT1 --> As Quantity. 
+SUM_SLOT2 --> As Value. 
+\nYAFA Retailer Info\nJune’23 CR\n\n===== SLIDE 77 =====\nYAFA FOVA To Do Browser\nFOVA to do Browser : 
+
+This browser will show all the outstanding FOVA reports for a particular selection (retailer / channel / country). 
+In BAU, this is used for FOVA checking and before starting data salvation all FOVA reports should be cleared from this browser. \n\n===== SLIDE 78 =====\nYAFA FOVA Report Browser\nFOVA Reports Browser : 
+
+This browser will be used to see report for a particular store for a particular period. It will show all the reports for the store regardless of its status (FOVA Not Ok or FOVA Ok).\n\n===== SLIDE 79 =====\nYAFA FOVA Statistic Browser\nFOVA statistic browser :
+
+This browser is used to check results of a particular statistical test over a period of time (10 / 20 / 52 weeks). 
+This will show results in tabular format as well as in Graph format. \n\n===== SLIDE 80 =====\nBasic checks for Questionable stores\nFollowing are the checks which the operator needs to perform while doing FOVA.\n--- TABLE ---\nFOVA Handling Checklist\nCheck % of loading for retailer.\nCheck country specific information\nCheck retailer specific information (the operator should also make note of census / sample Retailer)\nCheck General overview\nIs there any increase or decrease in questionable stores as per FOVA tag?\nCheck retailer level trend\nIs there any variation?\nCopy FOVA Not Ok stores from YAFA and extract it in excel sheet.\nCheck retailer wise questionable stores (FOVA to do Browser) (Make note of census / sample store)\nCheck global frequency table\nCheck all the test and related table with ***\nCheck super group tables\nCheck daily data information (if any). Compare with previous week to identify variation.\nCheck country specific or additional information (Seasonality, holiday etc.) or sales sheet\nFollow country guidelines as per FOVA tag / retailer / sample / census etc.\nBased on complete analysis, is decision taken by the operator?\nKeep performing the above steps for all FOVA Not Ok stores until the operator is able to find a pattern or identify the issue with the Retailers / shops.\nOnce the operator has identified the issue, the operator can take decision for remaining stores based upon the guidelines.\nUpdate the decision in excel with the comment\nDecision is applied on store through YAFA\n\n===== SLIDE 81 =====\nFova process Flow\n\n===== SLIDE 82 =====\nBasic checks for Questionable stores\nCensus :
+For Census stores, data represents true scenario for that store and data does not project to any other stores, so we can accept real data
+An operator can accept the real data even if it is not inline with Last Good Period data
+If data is not received for a store and store was closed due to real situation like remodeling, road work, reconstruction etc. then store should be kept as Empty store
+In case of daily data
+If the data is missing completely for a retailer for a specific day, it must be captured from the retailer level check
+If data is missing for one / more day(s) for one / few census store(s) for a particular retailer, the data can be accepted, except if prior information is received for missing day(s) (e.g. technical issue)\n\n===== SLIDE 83 =====\nBasic checks for Questionable stores\nSample :
+
+If strange behavior is observed by an operator without any specific reason, data must be salvaged as data will be projected to other stores as well
+Sample stores project the data to Universe, so unexpected variation in data cannot be accepted, kindly refer below example
+In case of daily data - 
+If the data is missing completely for a retailer for a specific day, it must be captured from the retailer level check
+If data is missing for one / more day(s) for one / few sample store of a particular retailer, data is to be factored / Estimated based on salvation rules
+Salvation Rule for missing day(s) are :
+If the data is missing for 2 or more days, then the store must be Estimated
+If the weight of the day is higher than other days and miss a part of the assortment sold in a week, then it must be Estimated (e.g. Friday or Saturday for a hypermarket)
+For all other missing days, store is to be factored (the factor value must adjust the Rawdata to the expected level)\n\n===== SLIDE 84 =====\nDAILY DATA CHECK\nPURPOSE: 
+
+Daily sales data helps the operator to validate retailer’s data on a weekly basis
+
+If a store is having missing data or unusual data trend for a specific day in a week, the operator can identify such cases by checking daily sales data reports
+
+To use daily data information in SIRVAL, set up needs to be done in RFE to send those data to SIRVAL
+
+This check will be applicable only for those Country / Retailers where daily sales data is received.\n\n===== SLIDE 85 =====\nScope of Daily Data Check\nThrough Daily data check
+User can identify the missing day which are expected
+User can check any cumulative data of one day to another.
+User can identify the very low sales in particular day
+
+
+\nOut of Scope for Daily data check\nThrough Daily data check, 
+User can not check the daily data trend from previous period .
+User can not compare day wise sales with other retailer/store\n\n===== SLIDE 86 =====\nRules & Restriction - Priority for FOVA reports\nAll FOVA reports will be tagged with a priority number according to the errors present in the data for that store.
+Based on the errors present in the store, the priority numbers will differ.
+All identified cases, like Truncation, No Reset, High deviance etc. will be prioritized as 999.
+For First FOVA Run and No Common item, Priority will be Blank.
+For all Data Good cases, Priority will be Zero.
+For all Questionable stores priority number will be n_ks_unit value.
+In Report there are various tables to analyze data on various parameters like Total Store, units, Price, Super group etc… The operator need to take decision based on these tables. The operator can find the table which contain problem from finding “***” in the report\n\n===== SLIDE 87 =====\nRules & Restriction - Validate stores\nFOVA checking should start immediately after data is received (full or partial)
+If any discrepancies (store level / retailer level / channel level) are found then questions must be raised immediately to onshore / retailer
+Any additional information is available for retailer / season / region, it must be shared with the operator who is responsible for FOVA handling
+All stores should be checked and cleared from YAFA before going ahead for salvation
+Fova handling should be done only for the “Fova NOT OK” stores thrown by the system. 
+No Data Good stores should be checked. If there is any problems in the Data Good stores then raise Issue to Governance and country MSci to fine tune the parameters.
+\n\n===== SLIDE 88 =====\nRules & Restriction - Validate stores\nTo validate questionable stores apart from FOVA reports, the operator requires following information :
+
+Seasonality information
+Missing day information
+Remodeling information
+Bank holidays
+National & regional festivals
+Location \ Area information (e.g. Coastal shops, Mountain shops, Shops near to School etc.)
+The final decision of a Fova report should be based on below parameters content.
+
+Attached Template should be updated on Yearly basis
+
+\n\n===== SLIDE 89 =====\nAdditional Store Validation Guidance\nThis is the additional guideline for the store validation part. It provides Global rules and roles. For Store level validation (FOVA and SU process for A2S stores).
+
+It includes general guidance and suggestion. But in some countries some variations are allowed, as it defined by countries Ops Lead and/or Data Science team.
+
+Assumptions 
+It allows to estimate not ok stores – in case amount stores per retailer minimal (Standard threshold less than 3%). Can variate per country/retailer.
+Retailer Engagement (EDD) –discuss with retailers' data – can be country specific (example in some this is done by IV team or for A2S, by DA).
+Main decision on production done by Ops Lead/DS. Can be different teams depend on country.
+DOT (daily calls) exists in country to discuss status of production. 
+
+\n\n===== SLIDE 90 =====\nAdditional Store Validation Guidance\nResponsibility:
+
+IV Operators are responsible to follow that guidance. In case guidance is not follow. Any issues caused due it, are responsibility of specific operators.
+
+IV Operators must evaluate all status of FOVA not ok, not only linked with TRENDS
+
+In case wrong decisions taken by respective team leaders – any QE can`t be assigned on IV teamd text
+
+\n\n===== SLIDE 91 =====\nAdditional Store Validation Guidance\nDecision tree
+
+Scenario1:
+No problematic stores
+Actions - Continue with current flow 
+
+Scenario 2
+No. of problematic stores not exceed defined threshold (default 3 % on retailer level)
+
+Actions 
+1.Operator should review issue reason – based on general knowledge (example if it could any event in specific region, or special events in country). And what level of issue (like increase in trend just 30% and not 500%), or other tag like fully equal data. This step should be skipped as per general recommendation, but it must be aligned based on country specific. 
+
+2. By General recommendation user can estimate all ‘not ok’ stores, if after step 1 user don`t know reason of issue. This rule can be changed by country leaders and depend on retailer contracts and country specific - and in this case operator should ask EDD/Retailer engagement team to contact retailer for confirmation
+
+3. In case there was need to contact but no answer from retailer in needed time- such stores are estimated.
+
+\n\n===== SLIDE 92 =====\nAdditional Store Validation Guidance\nScenario 3
+No. of problematic stores  exceed defined threshold(default 3 % on retailer level)
+
+Actions
+
+1. Operator should review issue reason – base on general knowledge (example if it could any event in specific region, or special events in country). And what level of issue (like increase in trend just 30% and not 500%). In case tags are linked with trend change, user can make decided base on experience  to flag such information ok(example during Christmas week). But it must be consulted with IV country leader. 
+        In case issues are not linked with trend tags we should proceed to step2. 
+
+2. User must inform EDD/Retailer engagement team to contact with specific request. Those stores can`t be marked as OK except without retailer confirmation. On daily DOT call it should be highlighted that we have such retailers, so country is informed 
+
+3. In case there is no reply from retailers/or retailers can`t be reached due any reason. During DOT calls there should be ask for country stake holders for next actions.
+
+Decision on such cases, must be taken ether by local DS or Ops leads. In this case IV team should just execute agreed solution.
+\n\n===== SLIDE 93 =====\nAdditional Store Validation Guidance\nBest practices
+
+To simplify process and rules it recommended – to group retailers to good and bad quality. Such separation will allow- to keep attention even on small amount of FOVA not ok (Scenarion2) - for small retailers and at same time potentially skip checks of FOVA for good retailers in Scenarion2- making them just Fova OK. And immediately estimate not good retailers' data
+
+It also recommended splitting retailers by group of Importance (one indication could be ACV of retailer. Or base on country importance. This will allow to build more clear rules. Of scenarios. In case we have Scenarion3 (so big amount of FOVA not ok). If we stop production, or immediately do estimation. This agreement should be documented as part of country process. And sign off by country Ops lead, before can be implemented. 
+
+Also, there could be build list of retailers. For which we wait or not wait answer from Retailer Engagement/EDD team. As we know that based on experience. Some retailers may not cooperate with NielsenIQ. So, for such retailers- there should be clear instructions, what should be done in case of Scenario3. 
+
+\n\n===== SLIDE 94 =====\nAdditional Store Validation Guidance\n--- TABLE ---\nTag | Description | Comment\n301 | TRUNC - ESTIMATION PROPOSED | medium chance of wrong data\n302 | IDENTICAL VOLUMETRICS - ESTIMATION PROPOSED | wrong data\n306 | IDENTICAL PRICE | high chance of wrong data\n307 | CHANGED PRICE | high chance of wrong data\n308 | PRICE SYNC | medium chance of wrong data\n313 | NO COMMOM ITEMS FOUND | high chance of wrong data\n314 | NO TREND IN COMMON ITEMS, BUT TREND IN ALL ITEMS | medium chance of wrong data\n315 | NO TREND IN ALL ITEMS, BUT TREND IN COMMON ITEMS | medium chance of wrong data\n316 | MISSING DAYS | wrong data\n332 | STORE STRUCTURAL DEFICIENCIES | high chance of wrong data\n303 | NO RESET - ESTIMATION PROPOSED | high chance of wrong data\nBelow Are few – FOVA tags (not linked with TREND check – for which it mandatory to deep dive, and FOVA ok flag shouldn't be put without answer from Retailers or IV leader revision.\n\n===== SLIDE 95 =====\nRules & Restriction - General\nAll Fova not ok stores should be checked from only one tool i.e. SIRVAL Web application(YAFA) only (No store monitor, SAS, SQL or any other tools should be used).
+Fova checking should start immediately after loading is complete for each store.
+FOVA_PARAMETER & FOVA_PARAMETERS_LT  process needs to be completed for T-1 period.
+All required parameters needs to be set up before we go with new FOVA run.
+There is minimum 100-150 stores in each IBD and it should be align with SO team.
+FOVA_PARAMETRS_LT process should be ran for 104 weeks at the time of implementation first before running FOVA.
+The operator needs to follow the deployment steps to keep the process as BAU.
+For new stores, Onshore should align with Stat Ops for initial weeks to accept the data.
+A Standard template(attached) need to be updated containing information about retailers/stores and their behavior in normal days along with specific seasons and this should be reviewed yearly and when new retailer is added.
+DATA GOOD stores suggested by system should not be checked manually, if there is any problem in the DATA GOOD stores, it should be raised with examples to Stat Ops and IV Governance to look into the same.
+If additional information (daily data, temp closure, remodeling…) is available for any particular retailer, it must be used while performing Fova validation.
+YAFA enhancement is on-going right now which will be available soon, after that more rules will be added for general, retailer specific checks.\n\n===== SLIDE 96 =====\nRules & Restriction - Retailer Specific\nSIRVAL web interface is the primary & standard tool to perform retailer trend check.
+Retailer trend must be check from “YAFA Estimations” option present under YAFA tab in SIRVAL web interface.
+If retailer input is received in one chunk then all retailer level checks can be performed after 100% loading is complete for a particular retailer.
+In case retailer is received in various chunks then retailer level checks can be performed twice , one after 50% loading and another after 100%.
+If variation in the trend (in terms of no. of shops, items or units or value ) for a retailer is exceptional or suspicious, it must be investigated.
+If there is any Strange Behavior of Retailer, it should be immediately raised to Onshore/Retailer.
+A retailer/Channel behavior can be checked from General Overview of YAFA.
+Onshore and Offshore can have agreement for particular retailers how much variation should be accepted.
+A clear guideline should be agreed between on/offshore regarding retailers/channel have high variation.
+Retailer level check must be performed as data is received (Retailer/Channel/ Shop type/ Batch/regions/data inputs) and same filter should be created for YAFA  to perform this check.
+If more than 50% stores for particular selection are received in YAFA for Manual check, it must be confirmed with Onshore and potentially with retailer.
+If for given selection each week  more than 40% stores are received in YAFA, than please ask Stat Ops to fine tune the parameter for the Retailer/Channel.
+\n\n===== SLIDE 97 =====\nRules & Restriction - Census Specific\nStores which are received in YAFA should be checked from Top to bottom by Fova decision message(all the pages)  till operator is confident that same decision can be applied for rest of the stores the data for the particular selection (Retailer/Channel/Shop Type…).
+As Census store is reflecting its own data, the operator should accept the real variation cases, data should be estimated only if it’s a technical issue or real erroneous data.
+While checking data for Census store, the operator need to check that incoming data is usable or not, and if any problem is found all relevant table (based on Fova tag) should be looked.
+If strange behaviour is observed for Census shop without any additional information, it must be estimated  if no particular guidelines are set for census retailers.
+If the data is acceptable based on comparison with LGP and more previous weeks or year in terms of all statistical tests and tables,  they can be SET TO OK if not acceptable then it must be estimated.
+\n\n===== SLIDE 98 =====\nRules & Restriction - Sample Specific\nFor sample retailer /channel, all FOVA NOT OK stores should be checked and no big variation should be allowed as it will be projected to other store as well- Such stores should be estimated if particular guidelines are set up or else.
+If there is no seasonality effect than for Sample stores, expected variation should be accepted.
+If the data is acceptable based on comparison with LGP and more previous weeks or year in terms of all statistical tests and tables, they can be SET TO OK otherwise Estimate.
+If the data is not in line with previous week and Year’s Trend then it can be Salvaged.
+If strange behaviour is observed for sample shop without any additional information, it must be Estimated  Onshore/Retailer if no particular guidelines are set for sample retailers.
+After 5(no of weeks specified in Parameter) week of continuous bad data and store is Estimated , if the normal Trend reappears then data should be accepted.
+After 2 week of continuous bad data and store is Estimated , if the same trend is continue then it should be confirmed with Onshore.\n\n===== SLIDE 99 =====\nRules & Restriction - Trend Table\nIf the store is flagged as “Trend Test not OK” then;
+
+first check should be on Festival/Holiday information for the country/retailer
+Then all other tables need to be checked to explain the sales (fex Unit freq, Super group freq. etc..)
+Also check last year trend for the similar period to cross verify the sale 
+If required perform CREF analysis for the particular store
+\n\n===== SLIDE 100 =====\nRules & Restriction - Daily Data\nThe Sirval execution team must receive daily data information for all retailers/stores that provide us with daily input files.
+In RFE version 5, a report can be extracted at retailer level holding all the daily data information. The RFE team must provide us this information before the Sirval execution team starts with Fova handling.
+The files will be shared from RFE via an automatically created email. The operator need to make sure the email is send to all relevant email group address.
+In case the batchid sent from RFE to Sirval is containing all the stores of a retailer, the file must be provided together with the rawdata. In case the batchid contains a certain number of stores for a particular retailer, the same rule applies. In case, a batchid per shop is created, the file must only be sent to the Sirval team when a certain number of shops per retailer have been reformatted to sirpair files. In this case, clear rules and timelines must be discussed between both teams.
+Whenever daily data info is available, this info must be used additional to the existing Fova reports to judge on the quality of the incoming stores data and on the potential actions to take.
+Missing day information as well as inconsistencies in the daily data must (during Fova handling) be xchecked with RFE team and the retailer itself if required.
+\n\n===== SLIDE 101 =====\nRules & Restriction - Daily Data\nWhat is a missing day?
+
+A day when the data is  expected but not received in the input is called a missing day. Normal bank holiday or store closure days will not be considered as Missing days and they need to be communicated in advance.
+These rules will be valid only for the retailers for which reliable daily sales information is received.
+
+Census
+
+If a day is missing for full retailer need to be captured from the retailer check.
+If one/more day(s) is missing for one/few census store of a particular retailer, we accept the data, excluded  if we have received prior information is received for missing day (e.g. technical issue).
+
+Sample
+
+If a day is missing for full retailer need to be captured from the retailer check.
+If one/more day(s) is missing for one/few sample store of a particular retailer, Data need to be factored/Estimated based on salvation rules.
+
+Salvation Rule for missing day(s):-
+
+If 2 or more days are missing then store must be Estimated.
+If the weight of the day is higher than other days and miss a part of the assortment sold in a week then it must be estimated (fex Friday or Saturday for a hypermarket).
+For all other missing day store need to be factor (the factor value must adjust the Rawdata to the expected level).
+
+\n\n===== SLIDE 102 =====\nSmart way of FOVA checking\nRequirements
+When we have more number of stores thrown in YAFA, usually the operator checks the FOVA report for almost all stores. However they are not following all the steps describe in SOP and skip few points which leads to quality issues.
+On the other hand, if they start checking all FOVA with all steps as described in SOP; it may lead to delay in preparing Rawdata and might impact overall cycle time of the production
+Solution
+Using the smart way, the operator can reduce the chances of error & time required to check all FOVA for the retailers. In a way it will help to increase the productivity & reduce the quality issue\n\n===== SLIDE 103 =====\nSmart way of FOVA checking\nHow to check FOVA smartly?
+
+The operator needs to start checking FOVA retailer wise starting with high priority cases. And needs to check all FOVA NOT OK cases which are thrown in YAFA with high priority
+
+For the LOW priority FOVA cases, once user has confidence that all the stores which are checked have no issues & remaining all low priority stores can be SET TO OK without checking it, they can do so
+
+If we have more number of FOVA NOT OK cases with similar tag then also we can apply the same logic that after checking initial few FOVA NOT OK cases, if no issues found, remaining FOVA NOT OK can be SET TO OK without checking any further
+
+Retailer specific information will also help to reduce the time of doing FOVA. Like DRUG retailers, we always have variation in common items. So if the same issue repeats, the operator can SET TO OK after initial checks on FOVA NOT OK cases
+
+THE OPERATOR MUST FOLLOW ALL STEPS DESCRIBED WHEN THEY ARE CHECKING FOVA REPORTS. THEY CAN NOT SKIP ANY OF THE STEPS\n\n===== SLIDE 104 =====\nDM 25641 FOVA Automation Rule:\nThere are many countries in which they are fallowing the predefined rules to handle the fova questionable stores. In this, standard action to be taken on questionable (Not ok) stores and set the stores OK or salvage. This method involves the less effort for the users as need to follow the predefined rule for the retailer.
+
+However, this needs to be automated where stores can be set OK or salvage automatically using certain rules which is used by user manually. For this reason, a new process is introduced which is called as “FOVA AUTOMATION” which can apply Fova automation rule automatically. This process is added in GUI screen on below path:
+
+Sys Set up --> Fova Automation
+
+This process is triggered like autoload functionality. Process is triggered on specific time interval as per the selection done by the user and automation rules are applied once the specific % loading gets completed. Once process is triggered it follow the Fova automation rule for stores to set ok or Salvage.
+
+\nJan’23 CR\n\n===== SLIDE 105 =====\nDM 25641 FOVA Automation Rule:\nJan’23 CR\nUser interface:\n\n===== SLIDE 106 =====\nDM 25641 FOVA Automation Rule:\nThese Automation rules are set differently for Census and Sample retailer stores. C19 approach follows the simple rule for the stores status to set and those rules are as below:
+
+For Census Retailer: If <3% fova not ok stores for Retailer, Automatically SET TO OK all those questionable stores
+For Sample Retailer: If <3% fova not ok stores for Retailer, Automatically Apply Salvation(Estimate) on all those questionable stores  
+
+There are few cases which are out scope from this Fova automation rules, and they are as below:
+
+Retailers which do not fall under FOVA automation rule, will be treated as BAU. 
+TTR retailers are out of scope as we are not running fova on these stores. Due to this, TTR stores are excluded from Fova automation rule. TTR stores are by default excluded from this process based on the already country set up parameter “TTR_STORE_LIST”.
+ECOM, TTR, Special retailers, Daily Data reception are Out of Scope from  fova automation Rule.
+Mixed retailers are those retailers in which we can have some stores in sample and some in census. For such retailer, need to mention in store char "AC_STORE_CHAR6" which are store census and sample by putting "C" or "S" respectively. Based on that sample and census rule applied on mixed retailer. 
+\nJan’23 CR\n\n===== SLIDE 107 =====\nDM 25641 FOVA Automation Rule:\nBelow example will give better understanding of fova automation approach:
+
+
+
+
+
+Now to apply this rules we need to provide some information to process in order to identify the retailer.
+So, basically here we need to bifurcate the retailer that whether they are census or sample or mixed retailer (Some stores are census, and some are sample) then only process will apply the automatic rule on those retailer.
+To give this bifurcation, we have a new table called as FOVA_RETAILERS which can provide such information for the retailer. This table can be updated using the bulk load options where users can create input for the retailers in txt file and upload via bulk upload options. 
+\nJan’23 CR\n\n===== SLIDE 108 =====\nDM 25641 FOVA Automation Rule:\nUser can follow below path to upload file to update Fova_Retailers table:
+
+OP Set up --> Bulk Upload --> Bulk Load/Bulk update --> Fova_Retailer
+
+This table contains below columns where users' needs to provide information follows
+\nJan’23 CR\n\n===== SLIDE 109 =====\nDM 25641 FOVA Automation Rule:\n
+
+
+
+
+
+
+
+
+
+
+
+Based on previous set up, process will set the stores either OK or Estimate on the retailer type using the rule.
+
+\nJan’23 CR\nFor Mixed retailer user has to define the parameter "RETAILER_TYPE". In this parameter country has to use "AC_STORE_CHAR6" and in stores table need to mention for that mixed retailer, which are the store belong to census and sample by putting "C" or "S" respectively. Based on this process will apply decision on Census and sample store using the rule for the retailer. This is only for the mixed retailer.
+
+For Ex: If mixed retailer having 500 stores and out of that 350 are census and 150 are sample. Country need to define for these 500 store AC_STORE_CHAR6 as C or S. When this process run it apply decision on 350 store based on census rule and apply decision on 150 store based on Sample rule.\n\n===== SLIDE 110 =====\nDM 25641 FOVA Automation Rule:\nThere are few parameters using which country can exclude specific stores and fova tags from this rule to apply. Those parameters are as below:
+
+FOVA_EXCLUDE_STORE:
+Using this parameter, country can exclude specific list of stores from fova automation rules using the SQL query  or stores mentioning with comma separated.
+
+FOVA_EXCLUDE_TAG:
+Using this this parameter country can exclude specific list of FOVA Tag from fova automation rule using the SQL query  or stores mentioning with comma separated. 
+
+In order to trigger the Fova Automation rule on Fova not ok stores, process needs to know if enough stores are loaded or not and whether the fova ok not count is less then or greater then the defined parameter. Then only process will apply those automatic rules. For this process takes into consider the YAFA loading status from below path:
+
+YAFA --> Loading Stats --> Loading stats:
+\nJan’23 CR\n\n===== SLIDE 111 =====\nDM 25641 FOVA Automation Rule:\n
+
+
+
+
+
+
+
+
+
+From here, the process checks what % of loading completed and out of that what % fova not ok count. As mentioned earlier, the process triggers this automatic rule when 95% of loading gets completed and based on the table “FOVA_RETILER” column “RULE” it takes the % information for retailer to use Fova automation rule. Default will be 3 but country can change according to their requirement. So, from this interface it gets % loading and % not ok count and then it triggers the process and does the rest (Set to ok or Set to Salvage (Estimate)) things.\nJan’23 CR\n\n===== SLIDE 112 =====\nDM 25641 FOVA Automation Rule:\nCalculate percentage of loading as: (Loaded stores/ Expected stores) x 100 
+Calculate percentage of not ok stores as: (NOT OK stores/ Loaded stores) x 100 
+Flag the grouped stores (grouped by <GROUP_CHAR > and retailer type) as follows: 
+IF "% OF LOADING">= <FOVA_LOADING_PERCENTAGE - parameter> and "% OF NOT OK"< 3 and AC_RETAILER_TYPE=’C’ then 'SET OK' 
+IF "% OF LOADING">= <FOVA_LOADING_PERCENTAGE - parameter> and "% OF NOT OK"< 3 and AC_RETAILER_TYPE=’S’ then 'SET ESTIMATE’ 
+IF “% OF LOADING">= <FOVA_LOADING_PERCENTAGE - parameter> and "% OF NOT OK">= 3 then 'Critical' 
+IF "% OF LOADING" < <FOVA_LOADING_PERCENTAGE> then 'WARNING'
+
+
+
+
+
+
+
+Note:
+The value 3 for "% OF NOT OK condition is obtained from the RULE column of FOVA_RETAILERS table if no values is present then DEFAULT value is taken as 3.
+
+
+\nJan’23 CR\n\n===== SLIDE 113 =====\nDM 25641 FOVA Automation Rule:\nGROUP_CHAR parameter contains the rule for grouping the retailer:
+
+
+
+If country does not have the enough stores in a retailer then they can group the retailer using this parameter.
+
+This FOVA Automation process will also trigger the alert automatically, this alert will be triggered based on the conditions below: 
+ Alert by Retailer/group: 
+>50% not ok and >20% loaded 
+>3% not ok and >95% Loaded
+
+Apart from this, there are 2 new check boxes added in the GUI:
+Census Retailer: If user wanted to see only census retailer loading stats, then can click on this box.
+Sample Retailer: if user wants to see only sample retailer loading stats, then can click on this box.
+
+If user wanted to see only Fova not ok retailer in the view, then they can click the check box “View fova not ok”
+\nJan’23 CR\n\n===== SLIDE 114 =====\nDM 25641 FOVA Automation Rule:\nThere is one table which is called as “FOVA_AUTOMATION_PARM”. This table provides the information of the Fova Automation GUI screen selection. See below:
+
+
+
+
+
+
+
+There are new monitor tags also introduced to identify the decision taken by Fova automation process. They are as follows:\nJan’23 CR\n--- TABLE ---\nAC_MONITORTAG | AC_MONITORSTATUS\n337 | Store set to Estimate by FOVA AUTOMATION rule\n337 | Store set to OK by FOVA AUTOMATION rule\n\n===== SLIDE 115 =====\nDM 25641 FOVA Automation Rule:\nParameters:
+
+
+
+
+
+
+
+
+
+
+
+
+
+Note: FOVA_RETAILER_TYPE parameter is mandatory to be set up by country even if country does not have a mixed retailer. If this parameter is kept blank in that case process will get abend. So, the country must put recommended value (AC_STORE_CHAR6) in this parameter to avoid process abend.
+
+Also there is a parameter based on which this process automatically trigger on specific interval. it is as below.
+
+
+\nJan’23 CR\n--- TABLE ---\nPROCESSID | PARAMTER TAG | PARAMETER DESCRIPTION | PARAMTER SERVICE RESOLUTION | DEFUALT VALUE | PARAMETER VALUE | PERIOD FROM | PERIOD TO\nFOVA_AUTOMATION | FOVA_LOADING_PERCENTAGE | Minimum % Loading stores to execute fova automation Rule, % Will be used as Base to execute rule. |  | 95 |  | 1 | 9999\nFOVA_AUTOMATION | FOVA_EXCLUDE_STORE | List of stores to exclude from FOVA automation Rule | SQL (SHORT), Separated by Comma |  | SQL: List to stores to exclude | 1 | 9999\nFOVA_AUTOMATION | FOVA_EXCLUDE_TAG | List of FOVA Tag to exclude from FOVA automation Rule | SQL (SHORT), Separated by Comma | 301,302,303,306,307,308,313,314,315,316,332,358,361 | SQL: List of tags to exclude | 1 | 9999\nFOVA_AUTOMATION | FOVA_RETAILER_TYPE | Store Char name needs to define, which store information, either C or S for stores | AC_STORE_CHAR |  | Example:AC_STORE_CHAR6 | 1 | 9999\nFOVA_AUTOMATION | GROUP_CHAR | Grouping or retailers with less than less than 30 stores; to be grouped together |  | AC_RETAILER | SQL: - group list of stores | 1 | 9999\nFOVA_AUTOMATION | FOVA_MIN_LOADING_PERCENTAGE | Min loading percentage in order to send alert |  | 20 |  | 1 | 9999\nFOVA_AUTOMATION | FOVA_ALERT_NOTOK_PERCENTAGE | Min FOVA not OK percentage in order to send alert |  | 0.01 |  | 1 | 9999\n--- TABLE ---\nProcess ID | Parameter Tag | Parameter Descr | Default value | Comment\nAUTOLOAD | FOVA_AUTOMATION_INTERVAL | Interval for autoload to submit fova automation | 2 | Value will be in the Hours.\n\n===== SLIDE 116 =====\nDM 25641 FOVA Automation Rule:\nTables: 
+
+FOVA_RETAILERS:\nJan’23 CR\n--- TABLE ---\nName | Type | COMMENT\nAC_RETAILER | VARCHAR2(200) | List of Retailer for which we need to define (Census / Sample / Mixed)\nRULE | VARCHAR2 (200) | % Information for Retailer to use Fova automation % Rule. 
+ (Default is 3%)\nTYPE | VARCHAR2 (1) | C / S / M (C: Census, S: Sample, M: Mixed)\nPERIOD FROM | NUMBER | Start Periodid, from where Rule wants to be executed\nPERIOD TO | NUMBER | End Periodid, Where Rule wants to be executed\n\n===== SLIDE 117 =====\nDM 25641 FOVA Automation Rule:\nTables:
+FOVA_AUTOMATION_PARM:
+
+\nJan’23 CR\n--- TABLE ---\nName | Type | COMMENT\nNC_PERIODSET | NUMBER | \nNC_PERIODID | NUMBER | \nAC_DTGROUP | VARCHAR2(100) | \nAC_CHANNELID | VARCHAR2(100) | \nAC_RETAILERID | VARCHAR2(100) | \nAC_C19_FOVA | VARCHAR2(1) | Y/N\nAC_ALERT_MAIL | VARCHAR2(1) | Y/N\nAC_SET_FOVA_OK | VARCHAR2(1) | Y/N\nAC_SET_ESTIMATE | VARCHAR2(1) | Y/N\nAC_DAY1 | VARCHAR2(1) | Y/N\nAC_DAY2 | VARCHAR2(1) | Y/N\nAC_DAY3 | VARCHAR2(1) | Y/N\nAC_DAY4 | VARCHAR2(1) | Y/N\nAC_DAY5 | VARCHAR2(1) | Y/N\nAC_DAY6 | VARCHAR2(1) | Y/N\nAC_DAY7 | VARCHAR2(1) | Y/N\nNC_DELAY | NUMBER | Interval\nAC_TIME | VARCHAR2(5) | Y/N\nAC_MAIL_ID | VARCHAR2(200) | List of mail ids\nAC_MAIL_MESSAGE | VARCHAR2(200) | Content of message if any\n\n===== SLIDE 118 =====\nDetailed explanation for each Test of FOVA\nSpecification for dynamic calculation of FoVa parameters\nFormal Validation for Volumetric data\n\n===== SLIDE 119 =====\nForce Fova Ok Changes :\nMar’21 CR\nIn the Fova process, there is a parameter FORCE_FOVA_OK which will change the Fova not ok store to Fova ok store and the store status shown as “ DATA GOOD - FORCE FOVA OK”. But in this case, the system is not saving the old fova tag in report or in store monitor.
+
+Now onwards, there is a change in fova report view that will showcase the old fova tag in a row “DECISION BEFORE FORCE FOVA OK”  as below :\n\n===== SLIDE 120 =====\nForce Fova Ok Changes (Cont..) :\nMar’21 CR\nThere is the introduction of a new monitor tag as “355” which will show the original decision before force fova ok as below :
+\n\n===== SLIDE 121 =====\nSET UP PARAMETERS : FOVA & FOVA_PARAMETER \nParameters to activate  New FOVA
+
+Parameter - “IBD” : 
+
+This parameter indicates the Group of the stores which is used by Fova_parameter process to calculate dynamic parameters
+
+
+
+As a parameter value we can take combination of any chars or sql statement. 
+E.g.
+
+
+
+Parameter - “USE_NEW_FOVA” : 
+
+This parameter indicates activation for New FOVA. Default of this parameter is “N”.\n--- TABLE ---\nAC_PROCESSID | AC_PARAMETERTAG | AC_PARAMETERDEFAULTVALUE\nFOVA | IBD | (null)\n--- TABLE ---\nAC_PROCESSID | AC_PARAMETERTAG | AC_PARAMETERDEFAULTVALUE\nFOVA | IBD | CASE WHEN AC_SHOPTYPE IN('LESS100','APO','BAB','TKH','KAF','DISC','LFI','BM','SST','NK','LEH','LDI','SMK') OR (AC_SHOPTYPE='APONEU' AND AC_CHANNELID='MAIP') THEN 'OTHERS' ELSE AC_SHOPTYPE || '_' || AC_CHANNELID END\n--- TABLE ---\nAC_PROCESSID | AC_PARAMETERTAG | AC_PARAMETERDEFAULTVALUE\nFOVA | USE_NEW_FOVA | N\n\n===== SLIDE 122 =====\nBelow are the different Operator level parameter is used for New FOVA activation  
+
+Parameter - “RELAUNCH_FOVA” : 
+
+This parameter indicates that for the current period whether we need to resubmit the FOVA after X period or not. Default value is “N”
+
+
+
+
+Parameter - “NR_PERIODS_TREND_ANALYSIS”:
+
+This parameter indicates the trend analysis period for FOVA_PARAMETER process
+
+
+		\n--- TABLE ---\nAC_PROCESSID | AC_PARAMETERTAG | AC_PARAMETERDEFAULTVALUE\nFOVA_PARAMEER | NR_PERIODS_TREND_ANALYSIS | 13\n--- TABLE ---\nAC_PROCESSID | AC_PARAMETERTAG | AC_PARAMETERDEFAULTVALUE\nFOVA | RELAUNCH_FOVA | N\nSET UP PARAMETERS : FOVA & FOVA_PARAMETER \n\n===== SLIDE 123 =====\nBelow are the different Operator level parameter is used for New FOVA activation 
+ 
+Parameter - “RESTRICTIVE_MODE”:
+
+This parameter indicates the strictness of the acceptance of the data based on parameter
+
+
+
+Default value is N – Means if  any FOVA test is out of bound for both the boundaries (LT&WT) then only system consider as FOVA NOT OK	
+
+If country changes to Y- this indicates that if any FOVA test which is out of  boundaries of LT or WT then system will consider as FOVA NOT OK
+
+	\n--- TABLE ---\nAC_PROCESSID | AC_PARAMETERTAG | AC_PARAMETERDEFAULTVALUE\nFOVA | RESTRICTIVE_MODE | N\nSET UP PARAMETERS : FOVA & FOVA_PARAMETER \n\n===== SLIDE 124 =====\nThis functionality must be use for specific purpose/cases where Operator always marks stores as FOVA OK for specific set of stores/Retailer that are not used in Production or in case a store level validation is not requested because we are already receiving validated data from different platforms.
+ 
+FORCE_FOVA_OK : 
+
+This is store level parameters which indicates the stores/Retailer to be force fully ok at the end of FOVA process. 
+Such stores will be not thrown in YAFA but can be seen using store monitor using Tag = 336 (DATA_GOOD FORCE OK) . 
+Default parameter is N
+
+
+
+
+REMOVE_FORCE_FOVA_OK :
+
+This parameters will be used to exclude forced stores from the Fova Parameters calculations. 
+Default parameter is Y.
+Where Y = Exclude FOVA OK Forced stores in the calculations,
+N = Include FOVA OK Forced stores in the calculations\nOct’18 CR\nSET UP PARAMETERS : FOVA & FOVA_PARAMETER \n\n===== SLIDE 125 =====\nParameters - ‘DAILY DATA’ :
+
+This parameter defines that whether daily data will be received or not in the input for a particular country / retailer / channel\nSET UP PARAMETERS : FOVA & FOVA_PARAMETER \n\n===== SLIDE 126 =====\nSET UP PARAMETERS : FOVA & FOVA_PARAMETER \nParameter - ‘Expected Days’ :
+
+This parameter defines that in daily data which days are mandatory to be received. The number reflects the sequence of the day, if Wednesday is normal closure day then sequence will be 1, 2, 4, 5, 6, and 7
+
+
+\nParameter - ‘Number of Periods’ :
+
+This parameter defines number of periods to be taken into account for the Trend Value table.  Average will be calculated based on these number of periods
+
+\n\n===== SLIDE 127 =====\nSET UP PARAMETERS : FOVA & FOVA_PARAMETER 
+\nYAFA PARAMETERS : (E-Com Specific)
+\n--- TABLE ---\nAC_PROCESSID | AC_PARAMETERTAG | AC_PARAMETERDESCRIPTION | AC_PARAMETERDEFAULTVALUE\nYAFA | LEVEL 1 | Column of stores table to filter or aggregate stores data | NULL\nYAFA | LEVEL 2 | Column of stores table to filter or aggregate stores data | NULL\nYAFA | MAX_LOADED_STORE_PERC | Maximum % of the Loaded Stores over which the row of the retailer to be underlined | 95\nYAFA | MAX_STORE_NOTOK_PERC | Maximum % of the  Stores not ok over which the row of the retailer to be underlined | 3\nYAFA | NUMBER_OF_PERIODS | Default number of periods to use into YAFA graphics for ecommerce data | 8\n\n===== SLIDE 128 =====\nSET UP PARAMETER : NEW STATUS “EXPECTED”\nParameters: 'FORCE_STATUS' :
+
+
+\n--- TABLE ---\nProcess ID | Parametertag | Parameter Default value\nRWLD | FORCE_STATUS | N= Do not force\n\n===== SLIDE 129 =====\nThe Fova process currently evaluates data in the Long Trend algorithm as OK even when the trend is too low or high. Due to this reason it was agreed to provide a solution that will limit the range of the possible trend factor. The same logic will also be applied to the Store Usability long trend algorithm.
+
+For LT Trend, if we have a single record in the current period and some records in the previous period (huge variations) and vise versa. So in that case LT trend may consider it as ok. So to handle this kind of scenario there is a slight modification needed in the SU LT trend and in the Fova as well. 
+
+So for this proposed enhancement will be to provide parameters that will define the allowable range of the trend during the Long Trend calculation. This change is applied to the Store Usability and FOVA processes.
+
+Parameters : 
+
+
+
+\nFOVA LT Bounds Limits\nOct ’21 CR\n--- TABLE ---\nProcess | Parameter Name | Description\nFOVA | TREND_W_LOW_LIMIT | Limit for Minimum value for LT Trend Weekly\nFOVA | TREND_W_HIGH_LIMIT | Limit for Maximum value for LT Trend Weekly\n\n===== SLIDE 130 =====\n
+
+
+It is defined in the VLDSYSTEM.PARAMETERS with :
+Description: Limit for Minimum value for LT Trend (Weekly)
+Comment: 
+Default value = 0.2
+Valid values are:  Any numeric value
+
+
+
+
+
+It is defined in the VLDSYSTEM.PARAMETERS with :
+Description: Limit for Maximum value for LT Trend (Weekly)
+Comment: 
+Default value = 5
+Valid values are:  Any numeric value
+\nFOVA LT Bounds Limits\nOct ’21 CR\nProcess FOVA - TREND_W_LOW_LIMIT\nProcess FOVA - TREND_W_HIGH_LIMIT\n\n===== SLIDE 131 =====\nAPPENDIX\nUseful Links 
+Job Scheduler
+Specification for dynamic calculation of FoVa parameters
+
+Formal Validation for Volumetric data
+
+Store Validation Guideline
+
+
+
+
+
+
+
+
+
+
+
+
+\n\n===== SLIDE 132 =====\nIntroduction :
+
+Small Store FOVA validation process is the newly introduced validation process within existing FOVA process.
+
+It Includes enhancement on validation for ‘Small Stores’ (parametric driven – refer slide 28) & enhancement on existing FOVA process.
+
+This enhancement performs validation by using the New LT Trend Test which is updated version of existing Trend Check (New Fova Algorithm).
+
+New LT Trend Test can work only if country is using New Fova.
+
+It uses data populated by “FOVA Parameter LT” & “FOVA parameters”.
+
+LT Trend Test uses 2 Years of backdata to validate the store and hence for country implementing this enhancement freshly should run FOVA Parameter LT for 104 back periods.
+
+FOVA parameter LT uses data from RWDL table & New LT Trend Check is performed based on Values.\nSmall Store FOVA Validation\nNov’19 CR\n\n===== SLIDE 133 =====\nUser can submit both the process i.e. FOVA Parameters & FOVA Parameter LT in any order required as there is no dependency for the same.
+
+Fova Parameter LT process will populate 2 tables which is used for performing New LT Trend Check:
+
+1. FOVA_SALESV – Store level Trend information
+2. FOVA_IBD_STATS – IBD level Trend information
+
+For Implementing New LT trend check user has to populate above tables using FOVA Parameters LT process.
+
+FOVA Parameters LT process is to be ran on 104 weeks in chunks of 25weeks to get those table populated fully before activating NEW LT Trend Check.
+
+Change parameter – MAX_NO_PERIOD_BACK for FOVA Parameters LT from “13” to “25” for running it in chunks of 25 weeks.
+
+There are multiple parameters driving the process which are shared in next slides.\nSmall Store FOVA Validation\nNov’19 CR\n\n===== SLIDE 134 =====\nHow to Implement - Small Store FOVA Validation
+\nUser/Country have to run FOVA PARAMETER LT process for 104 back period ( Keep chunk of 4 at least. Also suggesting to run 1st with 10 periods and check run time and based on that divide other periods in chunk but not more then 25 in 1 chunk). 
+User/Country have to create/update parameter tag called 'MAX_NO_PERIODS_BACK' as per your requirement to run process for back periods. Default value is 12.
+It is Suggested to run FOVA PARAMETER LT process over weekend.
+After successful run of FOVA PARAMETER LT process, User / Country need to activate the parameter FOVA_NEW_TREND_TEST = FB.
+After performing the above steps, country can use new fova process but before starting just to have clear below points with you.
+Do you want to enable validation for all stores or small stores only?
+Do you want to use the default threshold to be identify the small stores which is 300 ( in records) or more then it?
+Do you want to use parameter value other then default for the parameter belongs to this enhancement ?\n\n===== SLIDE 135 =====\nParameters with default value
+
+
+
+\n--- TABLE ---\nPROCESS ID | PARAMETER TAG | DESCRIPTION | SPECIFICITY | PARAMETER DEFAULT VALUE\nFOVA | SMALL_STORES_LIMIT | Threshold to be used to identify small stores. | STORE | 300\nGENERAL | FOVA_NEW_TREND_TEST | Parameter that enables the calculation of the New Trend Test Parameters into Fova Parameters process. | GENERAL | N\nFOVA | FOVA_LT_TREND_MODE | Small store validation into FOVA has to be enabled for SMALL STORES or ALL STORES | STORE | NO\nFOVA | LT_TREND_OVERRIDE | Comma separated list of fova conditions to override if new lt trend test is ok | STORE | 301,313,314,315,319,327,332\nFOVA | FOVA_MIN_SALES_VALUE | Flag as questionable any store with sales less than defined value. | STORE | 1\nNov’19 CR\n\n===== SLIDE 136 =====\n--- TABLE ---\nPROCESS ID | PARAMETER TAG | DESCRIPTION | SPECIFICITY | PARAMETER DEFAULT VALUE\nFOVA | TRUNCATE_VARIATION_LIMIT | It is used to set acceptable variation limit in store’s assortment. If Store’s assortment changes more then defined limit it will be thrown as exception. | STORE | 30\nFOVA | FOVA_LT_CONF_LEVEL | Confidence level used to retrieve the value of tvalue. (Dsci Decision) | PERIODSET | 0.99\nFOVA | FOVA_CHAR_CONTENT | To display the Char content in Fova Report | GENERAL | (null)\nFOVA | FOVA_LT_CONF_LEVEL_W | Confidence level used to retrieve the value of tvalue for weekly. (Dsci Decision) | PERIODSET | 0.99\nFOVA | FOVA_LT_CONF_LEVEL_BW | Confidence level used to retrieve the value of tvalue for bi-weekly. (Dsci Decision) | PERIODSET | 0.95\nFOVA | FOVA_ON_SMALL_STORES | Small store validation into FOVA has to be enabled or not | GENERAL | N\nParameters with default value
+
+
+
+\nNov’19 CR\n\n===== SLIDE 137 =====\n--- TABLE ---\nMONITOR TAG | DESCRIPTION\n351 | DATA_GOOD - NEW LT TREND OK\n352 | ESTIMATION PROPOSED - NEW LT TREND NOT OK\n353 | SMALL STORE TRUNCATE STRUCTURE\nNew FOVA Monitor Tag\nNov’19 CR\nNote: 
+
+Small Store validation process is recommended for Weekly Periodicity because of data availability for Trend Calculations via FOVA PARAMETERS LT process. \n\n===== SLIDE 138 =====\n--- TABLE ---\nPROCESS ID | STATISTIC TAGS | DESCRIPTION\nFOVA | 370 | LT EVALUATION\nFOVA | 371 | LT WEEKLY TREND\nFOVA | 372 | LT BI WEEKLY TREND\nFOVA | 373 | LT SALES VALUE\nFOVA | 374 | LT SALES VALUE PREV\nFOVA | 375 | LT SALES MIN LIMIT\nFOVA | 376 | LT SALES MAX LIMIT\nFOVA | 377 | LT WEEKLY TREND MIN LIMIT\nFOVA | 378 | LT WEEKLY TREND MAX LIMIT\nFOVA | 379 | LT BI WEEKLY TREND MIN LIMIT\nFOVA | 380 | LT BI WEEKLY TREND MAX LIMIT\nFOVA | 381 | LT NREC CURRENT\nFOVA | 382 | LT NREC LGP\nNew Parameter tags introduced in Storestats table\nNov’19 CR\n\n===== SLIDE 139 =====\nResult Report Section
+
+
+
+\nSmall Store FOVA Validation\nNov’19 CR\n\n===== SLIDE 140 =====\nResult Report Section : (Daily data Store)
+
+
+
+\nSmall Store FOVA Validation\nNov’19 CR\n\n===== SLIDE 141 =====\nUS Validation, FOVA: Store format change identification\nFOVA Store format change identification is a set of be enhancements put in existing FOVA process for detecting better changes inside Store format.
+
+Process will now work on Supergroup FOVA test, which is now enhanced to work on number of modules instead of number of records. 
+
+After look inside each individual Supergroup, process will first detect if the test is out of parameters to see if we have outlier there.
+
+Below are the changes made in Fova_Parameters & Fova process
+
+FOVA_PARAMETERS:
+
+New process will generate a new permanent table that holds the number of modules having sales and total sales by SG within each shop - “FOVA_STORE_SG table”.
+
+Table is structured by Period, Store & Supergroup.
+
+Table is partitioned by period and sub-partitioned by hash on Store Id.
+
+A new calculation is introduced to calculate the new Alpha parameter by module.\nJan’20 CR\n\n===== SLIDE 142 =====\nUS Validation, FOVA: Store format change identification (Cont..)\nFOVA: 
+
+A new tag is added into STORESTATS table to hold the number of modules treated in the store by period.
+
+AC_PROCESSID – ‘FOVA’
+AC_STATTAG – ‘383’
+AC_STATTAGDESCRIPTION – ‘Total Number of Modules’
+
+A new calculation is introduced at the backend algorithm to generate new indicators to display into the report (section SUPERGROUPFREQ).
+New indicators are based on number of modules having data within an SG and total Store SG sales.
+A new test is also introduced to calculate the final FOVA status.
+
+
+\nJan’20 CR\n\n===== SLIDE 143 =====\nUS Validation, FOVA: Store format change identification (Cont..)\nJan’20 CR\n\n===== SLIDE 144 =====\nUS Validation, FOVA: Store format change identification (Cont..)\nBelow set of Parameters is used to manage this enhancement:
+
+
+
+\nJan’20 CR\n\n===== SLIDE 145 =====\nUS Validation, FOVA: Store format change identification (Cont..)\nBelow set of Parameters is used to manage this enhancement:
+
+
+
+\nJan’20 CR\n\n===== SLIDE 146 =====\nUS Validation, FOVA: Store format change identification (Cont..)\nBelow set of Parameters is used to manage this enhancement:
+
+
+
+\nJan’20 CR\n\n===== SLIDE 147 =====\nREVISION DETAILS\n--- TABLE ---\nRev | Date | Author | CR | Comment\n0 | Sept 2013 | Dhara Patel, 
+Greet Verryckt, 
+Ferraro Roberto | No | First version of document\n1 | 27th Aug 2020 | Rohan Jani | No | Changes coming due to: new approach for documentation (split to basic and detailed)\n2 | 6th Oct 2021 | Adarshkumar Gajjar | Yes | Changes coming due to Oct’21 CR\n3 | 1st Dec 2022 | Adarshkumar Gajjar | Yes | Changes coming due to Dec'22 CR\n4 | 24th Jan 2023 | Adarshkumar Gajjar | Yes | Changes coming due to Jan'23 CR\n5 | 12th Jun 2023 | Adarshkumar Gajjar | Yes | Changes coming due to Jun'23 CR\n6 | 10th Jul 2023 | Adarshkumar Gajjar | Yes | Changes coming due to Jul 23 CR

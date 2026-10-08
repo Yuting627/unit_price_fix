@@ -1,0 +1,111 @@
+{
+  "paths": {
+    "before_mp_dir": "data/before_mp",
+    "store_target_dir": "data/store_target",
+    "output_dir": "data/peer_outlier",
+    "log_dir": "logs"
+  },
+  "data": {
+    "encoding": "gb18030",
+    "item_key": "nankey"
+  },
+  "base_cell": ["PLATFORMNAME", "SHOPTYPE"],
+  "ibd": {
+    "method": "province",
+    "distance": "category_mix",
+    "distance_mix_weight": 0.5,
+    "max_distance_quantile": 0.9,
+    "size_hist_periods": 3,
+    "size_max_splits": 4,
+    "min_store": 10,
+    "min_store_soft": 5,
+    "soft_stop": true,
+    "min_store_cat": 10,
+    "min_item": 10,
+    "min_overlap_periods": 3,
+    "trend_min_common_stores": 1,
+    "vi_max": 1.2,
+    "ks_max": 0.2,
+    "psi_max": 0.25,
+    "max_median_ratio": 2.0,
+    "psi_bins": 10,
+    "psi_min_bin_count": 5,
+    "het_alpha": 0.05,
+    "forced_nearest_warn_ratio": 0.30,
+    "allow_forced_nearest": false,
+    "check_level": "ibd",
+    "mix_lookback": 1,
+    "mix_weights": [],
+    "mix_common_stores": false,
+    "mix_common_lookback": 0,
+    "mix_start_period": 0
+  },
+  "fova": {
+    "adjbox_a": -4,
+    "adjbox_b": 3,
+    "adjbox_c": 7,
+    "longitude_iqr_coef": 1.9992,
+    "trim_pct": 0.01,
+    "sign_crit_lift": 1.96,
+    "min_hist_periods": 3,
+    "recommended_hist_periods": 13,
+    "hist_start_period": 20261407,
+    "hist_start_filter": false,
+    "trend_fence_fallback": true,
+    "longitude_borrow_cell": true,
+    "longitude_borrow_hist_scale": 3.0,
+    "fence_fallback_min_n": 10,
+    "borrow_min_peer": 5,
+    "adjbox_cell_shrink": true,
+    "adjbox_shrink_min_n": 30,
+    "adjbox_shrink_scale": 3.0
+  },
+  "seasonal": {
+    "baseline_periods": 13,
+    "sign_crit": 1.281552,
+    "min_common_stores": 10,
+    "borrow_base_cell": true
+  },
+  "peer": {
+    "evaluate_zero_rows": false,
+    "missing_sell_ratio": 0.8,
+    "missing_min_prev_ratio": 0.5,
+    "fallback_min_sell": 10,
+    "store_drop_ratio": 0.5,
+    "store_drop_min_prev_cat": 5
+  },
+  "stratify": {
+    "eta2_strong": 0.06,
+    "eta2_medium": 0.01
+  },
+  "evidence": {
+    "high_min": 3
+  },
+  "drilldown": {
+    "min_level": "suspicious",
+    "top_n": 5,
+    "min_peer_stores": 5
+  },
+  "stability": {
+    "rate_spike_ratio": 3.0,
+    "grid": {
+      "adjbox_c": [1.5, 3, 7, 9]
+    }
+  },
+  "report": {
+    "adjust_min_level": "suspicious",
+    "raw_output": true
+  },
+  "unit_fix": {
+    "fuller_detect_limit": 0.995,
+    "fuller_correct_limit": 0.9,
+    "fuller_max_tail": 50,
+    "critical_ratio": 2.5,
+    "min_peer_stores": 5,
+    "packsize_tolerance": 0.2,
+    "score_min": 0.5,
+    "store_shift_ratio": 0.6,
+    "store_shift_min_cat": 5,
+    "acv_source": "store_total"
+  }
+}

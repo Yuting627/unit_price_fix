@@ -1,0 +1,74 @@
+===== PAGE 1 =====
+FBD: FOVA IBD automation process: Connect Data Science
+29 September; 2026
+
+===== PAGE 2 =====
+Connect Data Science FBD: FOVA IBD automation process:
+Table of Contents
+No headings included in this document
+
+===== PAGE 3 =====
+Connect Data Science – FBD: FOVA IBD automation process:
+ – 3
+This document will intend to explain the logic and steps of the new tool in development for evaluation 
+and proposal of the new FBD's. The approach used here may be transferible and use for other IBDs, 
+such as DSASI and AFI IBDs. Using this tool the expectation is to end up with more homogenius IBD's, 
+as consequience FOVA results will be more accurated
+Data extraction:
+The new tool that it will evaluate and propose improve version of FBD will requiere following input:
+ Query that will extract the most relevant information for each store participating in FOVA 
+validation for each country, will include by Existing FBD - Shop - Sales and # records of latest 12 
+weeks, plus #Items_commons, #items_new, #items_cancel, ... This query was prepare by 
+Innovation IVSO Team and it is: Input_prep_query.txt
+ Query that will extract the shores and madras basic Store_Chars used for cell 
+definition: Input_madras_chars_query.txt1
+Automation method:
+ The two Inputs are read and merged by shops_id 
+ Simple comparation of Char values between Madras_shop_chars and Sirval_Shop_chars from 
+Store table
+ Calculate the basic stats for existing FBDs, and cross check with FBD requirements (min 200 
+stores, CV_value < 0.5 & CV_ref <0.3)
+ If any or all existing FBD meets criteria those ones will stop the evaluation 
+ Check if any Channel_shoptypes have less than 60 stores and stores with no_shoptype in 
+Madras, for those cases we will define FBD for each case, as nothing else can be done.
+ Calculation of basic statistic at Channel Shoptype and Retailer level to check if any individual 
+retailer may be a good candidate to FBD, if yes, define FBD for those cases
+ For the remmaining stores, we will count number of stores for each Channel-Shoptype, to define 
+the max - number of splits we could do to have as homogenious as possible FBD
+ Re-calcualte basic stats (CV_value, CV_records, number of stores) for the following groups:
+ Channel-Shoptype (Level_0)
+ Channel-Shoptype-Retailer (Level_1)
+ Considering those ones, we will split each retailer in the group as follows.
+ (df_work1.max_splits <= 1)  - IBD — Those ones will be proposed as New FBD
+ (df_work1.max_splits == 2) & (df_work1.avg_val_l1 >= df_work1.median_val) – Large,
+ (df_work1.max_splits == 2) & (df_work1.avg_val_l1 < df_work1.median_val) – Small,
+1. https://adlm.nielseniq.com/confluence/download/attachments/549749569/Input_madras_chars_query.txt?
+api=v2&modificationDate=1695908675397&version=1
+
+===== PAGE 4 =====
+Connect Data Science – FBD: FOVA IBD automation process:
+ – 4
+ (df_work1.max_splits == 3) & (df_work1.avg_val_l1 >= df_work1.q75_val), – Large
+ (df_work1.max_splits == 3) & (df_work1.avg_val_l1 > df_work1.q25_val) & (df_work1.avg_val_l1 < 
+df_work1.q75_val),-- Medium
+ (df_work1.max_splits == 3) & (df_work1.avg_val_l1 <= df_work1.q25_val), – Small
+ (df_work1.max_splits == 4) & (df_work1.avg_val_l1 >= df_work1.q75_val), – Large
+ (df_work1.max_splits == 4) & (df_work1.avg_val_l1 > df_work1.median_val) & 
+(df_work1.avg_val_l1 < df_work1.q75_val), – Large-Medium
+ (df_work1.max_splits == 4) & (df_work1.avg_val_l1 > df_work1.q25_val) & (df_work1.avg_val_l1 < 
+df_work1.median_val), – Small-Medium
+ (df_work1.max_splits == 4) & (df_work1.avg_val_l1 <= df_work1.q25_val) – Small
+ Re-evaluate if any of the group is less than 60 Stores, if yes merge with with closed one
+ Check if these new groups build on shoptype retailer basis by sales range meet criteria expected 
+criteria, if yes propose as new FBD
+ Then it will require an evaluation for remainig groups that will be compared to observe if those 
+ones are better than total shoptypes, the ones with less CV combination will be proposed as 
+New FBD
+ Boxplot for new and old FBDs are also generated to final analysis. 
+ And finally, a report is generated that will contain:
+ List of Stores with Shoptype and Retailer values and new proposed FBD in each column 
+ Final Stats for new and old FBDs are calculated and populated in output file (excel) one in each 
+sheet. 
+Here you can see and example of the output file: newfbd_PT_28-09-2023.xlsx2
+2. https://adlm.nielseniq.com/confluence/download/attachments/549749569/newfbd_PT_28-09-2023.xlsx?
+api=v2&modificationDate=1695908283657&version=1

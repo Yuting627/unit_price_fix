@@ -1,0 +1,82 @@
+[pages=6]
+
+===== PAGE 1 =====
+20260719 - IBD Shop Similarity 
+Analysis
+Archt. - Innovation
+28 September, 2026
+
+
+===== PAGE 2 =====
+Archt. - Innovation – 20260719 - IBD Shop Similarity Analysis
+2
+Table of Contents
+1
+Confirmed Anomalies .............................................................................................................................. 3
+2
+Similarity Logic:........................................................................................................................................ 4
+3
+Implementation of get_peer_shops tool:................................................................................................ 5
+3.1 Metrics: ..................................................................................................................................................... 5
+3.2 Issues:....................................................................................................................................................... 5
+4
+Proposed Solution:................................................................................................................................... 6
+4.1 Metrics...................................................................................................................................................... 6
+
+
+===== PAGE 3 =====
+Archt. - Innovation – 20260719 - IBD Shop Similarity Analysis
+Confirmed Anomalies – 3
+1 Confirmed Anomalies
+ Plots1
+ Insights:
+1. https://nielsenenterprise-my.sharepoint.com/:f:/g/personal/glen_sequeira_nielseniq_com/
+IgDajQydybB1Qa0Ao0WVJ92jAZv4Je5lQRUkNIienIj7Z1k?e=3kIrTR
+
+
+===== PAGE 4 =====
+Archt. - Innovation – 20260719 - IBD Shop Similarity Analysis
+Similarity Logic: – 4
+2 Similarity Logic:
+1. Compare the target shop only against shops belonging to the same IBD
+2. Fill missing weeks after the first observation with 0 to create continuous histories
+3. Remove week 2407 from similarity computation
+4. Apply a log transformation and calculate week-over-week change to focus on trend shape
+                            
+5. Compare only the weeks available in both shops and require a minimum overlap
+              
+6. Measure the difference between the two transformed trend series using Euclidean distance & adjust 
+the distance by the number of overlapping weeks
+               
+7. Sort candidate shops by Normalized Distance: Lower score = higher similarity
+
+
+===== PAGE 5 =====
+Archt. - Innovation – 20260719 - IBD Shop Similarity Analysis
+Implementation of get_peer_shops tool: – 5
+3 Implementation of get_peer_shops tool:
+3.1 Metrics:
+ Mean
+ Median 
+ Current shop value
+ Current vs Peer Mean %age
+ Peer Latest Change percentage
+          
+ Note
+3.2 Issues:
+ The scale of sales of all the peer shops will be different
+ Taking all shops in an IBD doesn't make sense
+
+
+===== PAGE 6 =====
+Archt. - Innovation – 20260719 - IBD Shop Similarity Analysis
+Proposed Solution: – 6
+4 Proposed Solution:
+4.1 Metrics
+ Metrics of the peers 
+target_growth_percentage:
+ target shop's percentage movement from 2406 to 2407
+ peer growth percentage median
+ Expected value
+Threshold or Choice of N:
+ Experiments could be performed with N = 3 or 5 or 7

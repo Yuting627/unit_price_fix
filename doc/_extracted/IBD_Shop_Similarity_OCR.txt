@@ -1,0 +1,76 @@
+===== PAGE 1 =====
+20260719 = IBD Shop Similarity Analysis Archt: Innovation
+28 September; 2026
+
+===== PAGE 2 =====
+Archt. Innovation 20260719 - IBD Shop Similarity Analysis
+Table of Contents
+Confirmed Anomalies
+2 Similarity Logic: 
+3 Implementation of get_peer_shops tool:
+5
+3.1 Metrics:
+5
+3.2 Issues:
+5
+Proposed Solution:_ 4.1 Metrics 
+
+===== PAGE 3 =====
+Archt. Innovation 20260719 - IBD Shop Similarity Analysis
+Confirmed Anomalies
+Plots" Insights:
+1. https:/ /nielsenenterprise-my sharepoint com/:f:/g/personal/glen_sequeira_nielseniq_com/ IgDajQydybB1 QaOAoOWVJ92jAZv4JeSIQRUkNlienljZZIk?e-3klrTR
+Confirmed Anomalies
+
+===== PAGE 4 =====
+Archt. Innovation 20260719 - IBD Shop Similarity Analysis
+2 Similarity Logic: 1. Compare the target shop only against shops belonging to the same IBD 2. Fill missing weeks after the first observation with 0 to create continuous histories 3_ Remove week 2407 from similarity computation 4 Apply a log transformation and calculate week-over-week change to focus on trend shape
+Lt = log(1 + Xt)
+Dt = Lt Lt-1
+5. Compare only the weeks available in both shops and require a minimum overlap
+Distance
+(Dtare "get t1
+Dcandidate )2
+6. Measure the difference between the two transformed trend series using Euclidean distance & adjust the distance by the number of overlapping weeks
+Distance
+Normalized Distance
+n
+7. Sort candidate shops by Normalized Distance: Lower score higher similarity
+Similarity Logic:
+
+===== PAGE 5 =====
+Archt. Innovation 20260719 - IBD Shop Similarity Analysis
+3 Implementation of get_peer_shopstool:
+3.1 Metrics:
+Mean
+Median Current shop value Current vs Peer Mean %age
+(Current Value
+Peer Mean)
+100
+Peer Mean
+Peer Latest Change percentage
+(Current Peer Mean
+Previous Peer Mean)
+100
+Previous Peer Mean
+Note
+3.2 Issues:
+The scale of sales of all the peer shops will be different Taking all shops in an IBD doesnt make sense
+Implementation of get_peer_shops tool: 5
+
+===== PAGE 6 =====
+Archt. Innovation 20260719 - IBD Shop Similarity Analysis
+4 Proposed Solution:
+4.1 Metrics
+Metrics of the peers
+target_growth_percentage:
+target shop's percentage movement from 2406 to 2407
+12407 100 X 12406 targct_growth pct S max(12406 , 1)
+peer growth percentage median
+12407 12406 1. For every selected peer compute T; max(z2406, 1) 2. Take the median m. 3.Report as percentage:
+pccr_growth_pct_mcdian = 100 X m
+Expected value
+cxpcctcd valuc_407 T2406 X (1 + m)
+Threshold or Choice of N:
+Experiments could be performed with N = 3 or 5 or 7
+Proposed Solution:
